@@ -63,9 +63,9 @@ public class HanlpSegUDF extends GenericUDF {
         Text s = (Text) converter.convert(arguments[0].get());
         String inputStr = s.toString();
         ArrayList<Text> result = new ArrayList<Text>();
-        if(inputStr!=null && inputStr.trim().length()>0) {
+        if (inputStr != null && inputStr.trim().length() > 0) {
             List<Term> tokens = segment.seg(s.toString());
-            for(Term term:tokens) {
+            for (Term term : tokens) {
                 result.add(new Text(term.word));
             }
         }
@@ -76,16 +76,6 @@ public class HanlpSegUDF extends GenericUDF {
     public String getDisplayString(String[] children) {
         assert (children.length == 2);
         return getStandardDisplayString("hanlpSeg", children);
-    }
-
-    public static void main(String[] args) throws HiveException {
-        HanlpSegUDF hanlpSegUDF = new HanlpSegUDF();
-        ObjectInspector valueOI0 = PrimitiveObjectInspectorFactory.javaStringObjectInspector;
-        ObjectInspector[] arguments = { valueOI0 };
-        hanlpSegUDF.initialize(arguments);
-        DeferredObject valueObj = new DeferredJavaObject(new Text("今天天气不错,风和日丽的"));
-        DeferredObject[] argument = { valueObj };
-        System.out.println(hanlpSegUDF.evaluate(argument));
     }
 
 }
