@@ -1,6 +1,8 @@
 package com.mobduos.bigdata.hive.udf;
 
 import com.hankcs.hanlp.HanLP;
+import com.hankcs.hanlp.corpus.tag.Nature;
+import com.hankcs.hanlp.dictionary.stopword.CoreStopWordDictionary;
 import com.hankcs.hanlp.seg.Segment;
 import com.hankcs.hanlp.seg.common.Term;
 import org.apache.hadoop.hive.ql.exec.Description;
@@ -28,7 +30,9 @@ import java.util.List;
         + "  [\"今天\", \"天气\", \"不错\"]")
 public class HanlpSegUDF extends GenericUDF {
     private transient ObjectInspectorConverters.Converter converter;
-    private transient Segment segment;
+    private static Segment segment = HanLP.newSegment()
+            .enableAllNamedEntityRecognize(true)
+            .enableCustomDictionary(true);
 
     @Override
     public ObjectInspector initialize(ObjectInspector[] arguments) throws UDFArgumentException {
@@ -44,8 +48,6 @@ public class HanlpSegUDF extends GenericUDF {
 
         converter = ObjectInspectorConverters.getConverter(arguments[0],
                 PrimitiveObjectInspectorFactory.writableStringObjectInspector);
-
-        segment = HanLP.newSegment().enableAllNamedEntityRecognize(true);
 
         return ObjectInspectorFactory
                 .getStandardListObjectInspector(PrimitiveObjectInspectorFactory
@@ -64,9 +66,13 @@ public class HanlpSegUDF extends GenericUDF {
         String inputStr = s.toString();
         ArrayList<Text> result = new ArrayList<Text>();
         if (inputStr != null && inputStr.trim().length() > 0) {
-            List<Term> tokens = segment.seg(s.toString());
-            for (Term term : tokens) {
-                result.add(new Text(term.word));
+            List<Term> tokens = segment.seg(inputStr);
+            if(tokens!=null && tokens.size()>0) {
+                for (Term term : tokens) {
+                    if(!CoreStopWordDictionary.contains(term.word) && !term.nature.equals(Nature.w)) {
+                        result.add(new Text(term.word));
+                    }
+                }
             }
         }
         return result;
