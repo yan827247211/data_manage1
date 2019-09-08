@@ -31,7 +31,9 @@ import java.util.List;
 public class HanlpSegUDF extends GenericUDF {
     private transient ObjectInspectorConverters.Converter converter;
     private static Segment segment = HanLP.newSegment()
+            .enableNameRecognize(true)
             .enableAllNamedEntityRecognize(true)
+            .enableOrganizationRecognize(false)   // 解决句末标点符号对分词的影响
             .enableCustomDictionary(true);
 
     @Override
@@ -69,6 +71,7 @@ public class HanlpSegUDF extends GenericUDF {
             List<Term> tokens = segment.seg(inputStr);
             if(tokens!=null && tokens.size()>0) {
                 for (Term term : tokens) {
+//                    System.out.println(term);
                     if(!CoreStopWordDictionary.contains(term.word) && !term.nature.equals(Nature.w)) {
                         result.add(new Text(term.word));
                     }

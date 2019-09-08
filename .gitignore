@@ -114,3 +114,8 @@ fabric.properties
 
 # My
 **/*.iml
+
+## hanlp dictionary
+**/*.txt.bin
+**/*.bin
+**/*.dat
