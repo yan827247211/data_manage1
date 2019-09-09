@@ -1,5 +1,5 @@
 --抖音视频原始日志
-CREATE TABLE `rlog_douyin_video`
+CREATE EXTERNAL TABLE `rlog_douyin_video`
 (
     `aweme_id`          string COMMENT '视频ID',
     `user_id`           string COMMENT '用户ID',
@@ -28,7 +28,8 @@ CREATE TABLE `rlog_douyin_video`
     ROW FORMAT DELIMITED
         FIELDS TERMINATED BY '\t'
         LINES TERMINATED BY '\n'
-    STORED AS TEXTFILE;
+    STORED AS TEXTFILE
+    LOCATION 'cosn://douyin-emr/video';
 
 --抖音用户原始日志
 CREATE TABLE `rlog_douyin_user`
