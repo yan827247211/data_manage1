@@ -6,6 +6,7 @@
 
     <groupId>com.mobduos.bigdata</groupId>
     <artifactId>hive-udf</artifactId>
+    <packaging>jar</packaging>
     <version>1.0</version>
 
     <dependencies>
