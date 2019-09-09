@@ -25,7 +25,7 @@ function exportSQL2Local() {
 
   sqlStr=$1
   localPath=$2
-  ${MYSQL_BIN} -h${MYSQL_REPORT_HOST} -P${MYSQL_REPORT_PORT} -u${MYSQL_REPORT_USER} -p${MYSQL_REPORT_PWD} ${MYSQL_REPORT_DB} -N -e "${sqlStr}" >${localPath}
+  ${MYSQL_BIN} -h"${MYSQL_REPORT_HOST}" -P"${MYSQL_REPORT_PORT}" -u"${MYSQL_REPORT_USER}" -p"${MYSQL_REPORT_PWD}" "${MYSQL_REPORT_DB}" -N -e "${sqlStr}" >"${localPath}"
 }
 
 # 执行Mysql语句
@@ -36,7 +36,7 @@ function execSql() {
   fi
 
   sqlStr=$1
-  ${MYSQL_BIN} -h${MYSQL_W_HOST} -P${MYSQL_PORT} -u${MYSQL_W_USER} -p${MYSQL_W_PWD} ${MYSQL_W_DBNAME} -N -e "${sqlStr}"
+  ${MYSQL_BIN} -h"${MYSQL_W_HOST}" -P"${MYSQL_PORT}" -u"${MYSQL_W_USER}" -p"${MYSQL_W_PWD}" "${MYSQL_W_DBNAME}" -N -e "${sqlStr}"
 }
 
 # 执行Hive语句
@@ -46,28 +46,35 @@ function execHql() {
     exit
   fi
   hqlStr=$1
-  echo "${HIVE_BIN} -e "
-  echo "$hqlStr"
+  echo "execHql:$hqlStr"
+  ${HIVE_BIN} -e "$hqlStr"
 }
 
 # 增加抖音分区
 function add_douyin_partition() {
-  if [ $# != 2 ]; then
+  if [ $# -lt 2 ]; then
     log 'wrong parameters!'
-    log 'usage:   add_douyin_partition dt hh'
+    log 'usage:   add_douyin_partition dt hh [log_type...]'
     log 'example: add_douyin_partition 20190908 08'
+    log 'example: add_douyin_partition 20190908 08 video user'
     exit 1
   fi
 
   _ALL_DOUYIN_LOG_TYPES=('video' 'user')
+  _TARGET_LOG_TYPES=("${_ALL_DOUYIN_LOG_TYPES[@]}")
+
+#如果参数数量大于2，则从第三个参数开始，作为需要倒入的日志类型
+  if [ $# -gt 2 ]; then
+    _TARGET_LOG_TYPES=("${@:3}")
+  fi
 
   _dt=$1
   _hour=$2
-  _logType=$3
+  _logType=''
   _table=''
   _hql=''
 
-  for _logType in "${_ALL_DOUYIN_LOG_TYPES[@]}"; do
+  for _logType in "${_TARGET_LOG_TYPES[@]}"; do
     log "start synchronize douyin.$_logType"
     case $_logType in
       video)
@@ -93,7 +100,7 @@ function add_douyin_partition() {
         exit 1
         ;;
     esac
-    _hql="${_hql}alter table ${_table} add if not exists partition(dt='${pDt}',hh='${pHour}') location '$COSN_DOUYIN_BUCKET_PATH_PREFIX/$_logType/$pDt/$pHour/';"
+    _hql="${_hql}alter table ${_table} add if not exists partition(dt='${_dt}',hh='${_hour}') location '$COSN_DOUYIN_BUCKET_PATH_PREFIX/$_logType/$_dt/$_hour';"
   done
 
   execHql "$_hql"

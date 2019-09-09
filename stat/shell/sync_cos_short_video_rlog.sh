@@ -25,17 +25,13 @@ source "$DIR/common/common_var.sh"
 source "$DIR/common/common_func.sh"
 
 # 检查参数
-if [ $# != 2 ]; then
+if [ $# -lt 2 ]; then
   log 'wrong parameters!'
   log 'usage: sync_cos_short_video_rlog.sh 20190909 08 '
   exit 1
 fi
 
-# 赋值参数
-pDt=$1
-pHour=$2
-
-add_douyin_partition "$1" "$2"
+add_douyin_partition "$@"
 
 check
 
