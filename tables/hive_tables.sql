@@ -17,6 +17,8 @@ CREATE TABLE `rlog_douyin_video`
     `product_id`        string COMMENT '商品ID',
     `ad_id`             string COMMENT '广告ID',
     `share_url`         string COMMENT '分享视频地址',
+    `vb_rank`           int COMMENT '今日最热视频排名',
+    `vb_rank_value`     bigint COMMENT '今日最热视频播放量',
     `create_time`       bigint COMMENT '爬取时间，10位时间戳，爬虫提供'
 ) COMMENT '抖音-视频-原始日志'
     PARTITIONED BY (
@@ -51,6 +53,7 @@ CREATE TABLE `rlog_douyin_user`
     `weibo_verify`             string COMMENT '微博认证',
     `enterprise_verify_reason` string COMMENT '官方认证',
     `is_shop`                  string COMMENT '是否有商品橱窗',
+    `be_followered_uid`        string COMMENT '被关注用户ID',
     `create_time`              bigint COMMENT '爬取时间，10位时间戳，爬虫提供'
 ) COMMENT '抖音-用户-原始日志'
     PARTITIONED BY (
