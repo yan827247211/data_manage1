@@ -17,8 +17,8 @@ CREATE EXTERNAL TABLE `rlog_douyin_video`
     `product_id`        string COMMENT '商品ID',
     `ad_id`             string COMMENT '广告ID',
     `share_url`         string COMMENT '分享视频地址',
-    `vb_rank`           int COMMENT '今日最热视频排名',
-    `vb_rank_value`     bigint COMMENT '今日最热视频播放量',
+--    `vb_rank`           int COMMENT '今日最热视频排名',
+--    `vb_rank_value`     bigint COMMENT '今日最热视频播放量',
     `create_time`       bigint COMMENT '爬取时间，10位时间戳，爬虫提供'
 ) COMMENT '抖音-视频-原始日志'
     PARTITIONED BY (
@@ -32,7 +32,7 @@ CREATE EXTERNAL TABLE `rlog_douyin_video`
     LOCATION 'cosn://douyin-emr/video';
 
 --抖音用户原始日志
-CREATE TABLE `rlog_douyin_user`
+CREATE EXTERNAL TABLE `rlog_douyin_user`
 (
     `user_id`                  string COMMENT '用户ID',
     `sec_user_id`              string COMMENT '用户ID，页面跳转用',
@@ -64,11 +64,12 @@ CREATE TABLE `rlog_douyin_user`
     ROW FORMAT DELIMITED
         FIELDS TERMINATED BY '\t'
         LINES TERMINATED BY '\n'
-    STORED AS TEXTFILE;
+    STORED AS TEXTFILE
+    LOCATION 'cosn://douyin-emr/user';
 
 
 --抖音评论原始日志
-CREATE TABLE `rlog_douyin_comment`
+CREATE EXTERNAL TABLE `rlog_douyin_comment`
 (
     `cid`              string COMMENT '评论ID',
     `aweme_id`         string COMMENT '视频ID',
@@ -91,7 +92,8 @@ CREATE TABLE `rlog_douyin_comment`
     ROW FORMAT DELIMITED
         FIELDS TERMINATED BY '\t'
         LINES TERMINATED BY '\n'
-    STORED AS TEXTFILE;
+    STORED AS TEXTFILE
+    LOCATION 'cosn://douyin-emr/comment';
 
 --抖音音乐原始日志 日志格式貌似不对，需要确认
 CREATE TABLE `rlog_douyin_music`
