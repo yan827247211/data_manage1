@@ -22,7 +22,7 @@ SET @@SESSION.SQL_LOG_BIN = 0;
 --
 
 SET @@GLOBAL.GTID_PURGED = /*!80000 '+'*/ '184fa05c-e231-11e8-a07b-6c92bf5b8f3e:1-16391815,
-1d78b01d-aa04-11e9-b780-18ded7a37962:1-57906,
+1d78b01d-aa04-11e9-b780-18ded7a37962:1-58595,
 25b4f59a-e231-11e8-a07c-6c92bf5b8b32:1-256';
 
 --
@@ -106,12 +106,18 @@ CREATE TABLE `dy_rpt_expert`
     `video_average_like_number`                  bigint(20) unsigned     NOT NULL COMMENT '视频均赞数',
     `video_average_comment_number`               bigint(20) unsigned     NOT NULL COMMENT '视频均评数',
     `video_average_share_number`                 bigint(20) unsigned     NOT NULL COMMENT '视频均转数',
-    `like_number`                                bigint(20) unsigned     NOT NULL COMMENT '点赞数',
+    `like_number`                                bigint(20) unsigned     NOT NULL COMMENT '点赞总数',
     `like_increment`                             bigint(20) unsigned     NOT NULL COMMENT '点赞增量',
     `like_speed_increase`                        decimal(10, 2)          NOT NULL COMMENT '点赞增速',
-    `fans_number`                                bigint(20) unsigned     NOT NULL COMMENT '粉丝数',
+    `fans_number`                                bigint(20) unsigned     NOT NULL COMMENT '粉丝总数',
     `fans_increment`                             bigint(20) unsigned     NOT NULL COMMENT '粉丝增量',
     `fans_speed_increase`                        decimal(10, 2)          NOT NULL COMMENT '粉丝增速',
+    `comment_number`                             bigint(20) unsigned     NOT NULL COMMENT '评论总量',
+    `comment_increment`                          bigint(20) unsigned     NOT NULL COMMENT '评论增量',
+    `comment_speed_increase`                     decimal(10, 2)          NOT NULL COMMENT '评论增速',
+    `forward_number`                             bigint(20) unsigned     NOT NULL COMMENT '转发总量',
+    `forward_increment`                          bigint(20) unsigned     NOT NULL COMMENT '转发增量',
+    `forward_speed_increase`                     decimal(10, 2)          NOT NULL COMMENT '转发增速',
     `head_portrait`                              varchar(255)            NOT NULL COMMENT '头像',
     `nickname`                                   varchar(255)            NOT NULL COMMENT '昵称',
     `account_authentication`                     int(11) unsigned        NOT NULL COMMENT '账号认证(0：未认证，1：MCN机构认证，2：企业蓝V认证)',
@@ -130,7 +136,7 @@ CREATE TABLE `dy_rpt_expert`
     `video_number_interregional`                 int(11) unsigned        NOT NULL COMMENT '视频数区间(1：50以下、2：50-100、3：100-200、4：200-500、5：500以上)',
     `like_number_interregional`                  int(11) unsigned        NOT NULL COMMENT '点赞数区间（1：10以下、2：10-50、3：50-100、4：100-200、5：200以上） 单位：万',
     `fans_number_interregional`                  int(11) unsigned        NOT NULL COMMENT '粉丝数区间（1：100-500、2：500-1000、3：1000-2000、4：2000以上）  单位：万',
-    `female_fan_ratio`                           int(11) unsigned        NOT NULL COMMENT '女性粉丝占比（0：10%以下、1：10%-20%、2：20%-30%、3：30%-40%，4：40%-50%，5：50%-60%，6：60%-70%，7：70%-80%，8：80%-90%，9：90%以上）',
+    `female_fans_ratio_interregional`            int(11) unsigned        NOT NULL COMMENT '女性粉丝占比区间（0：10%以下、1：10%-20%、2：20%-30%、3：30%-40%，4：40%-50%，5：50%-60%，6：60%-70%，7：70%-80%，8：80%-90%，9：90%以上）',
     `date_type`                                  int(11) unsigned        NOT NULL COMMENT '日期类型（0：当天数据统计，1：七天数据统计，2，三十天数据统计）',
     `date`                                       varchar(255)            NOT NULL COMMENT '数据日期',
     `create_time`                                datetime                NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '数据创建时间',
@@ -184,6 +190,29 @@ CREATE TABLE `dy_rpt_expert_live_broadcast`
     PRIMARY KEY (`expert_live_broadcast_id`) USING BTREE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8 COMMENT ='达人直播榜';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `dy_rpt_expert_proportion`
+--
+
+DROP TABLE IF EXISTS `dy_rpt_expert_proportion`;
+/*!40101 SET @saved_cs_client = @@character_set_client */;
+SET character_set_client = utf8mb4;
+CREATE TABLE `dy_rpt_expert_proportion`
+(
+    `id`                  bigint(20)   NOT NULL COMMENT '自增ID',
+    `expert_id`           varchar(255) NOT NULL COMMENT '达人ID',
+    `province_proportion` varchar(255) NOT NULL COMMENT '省份占比( 省份:比例,省份:比例 )',
+    `city_proportion`     varchar(255) NOT NULL COMMENT '城市占比( 城市:比例,城市:比例 )',
+    `age_proportion`      varchar(255)          DEFAULT NULL COMMENT '各年龄段所占比例(不同年龄段所占比例由 , 分隔开)\r\n 各年龄段（6-17、18-24、25-30、31-35、36-40、41+）',
+    `female_fans_ratio`   decimal(10, 2)        DEFAULT NULL COMMENT '女性粉丝所占比例',
+    `status`              int(11)      NOT NULL COMMENT '数据状态',
+    `create_time```       datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '数据创建时间',
+    `update_time`         datetime              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '数据修改时间',
+    PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8 COMMENT ='达人占比表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -274,6 +303,8 @@ CREATE TABLE `dy_rpt_video`
     `comment_increment`            bigint(20) unsigned     NOT NULL COMMENT '评论增量',
     `comment_speed_increase`       decimal(10, 2)          NOT NULL COMMENT '评论增速',
     `forward_number`               bigint(20) unsigned     NOT NULL COMMENT '转发数',
+    `forward_increment`            bigint(20)                       DEFAULT NULL COMMENT '转发增量',
+    `forward_speed_increase`       decimal(10, 2)          NOT NULL COMMENT '转发增速',
     `video_duration`               bigint(20) unsigned     NOT NULL COMMENT '视频时长',
     `video_cover`                  varchar(255)            NOT NULL COMMENT '视频封面',
     `video_title`                  varchar(255)            NOT NULL COMMENT '视频标题',
@@ -290,12 +321,11 @@ CREATE TABLE `dy_rpt_video`
     `city`                         varchar(255)            NOT NULL COMMENT '城市',
     `proportion`                   int(11)                 NOT NULL COMMENT '女性观众比例（0：10%以下、1：10%-20%、2：20%-30%、3：30%-40%，4：40%-50%，5：50%-60%，6：60%-70%，7：70%-80%，8：80%-90%，9：90%以上）',
     `age_range`                    int(11) unsigned        NOT NULL COMMENT '观众主要年龄（1：6-17、2：18-24、3：25-30、4：31-35、5：36-40、6：41+）',
-    `age_proportion`               varchar(255)            NOT NULL COMMENT '观众个年龄段所占比例(不同年龄段所占比例由 , 分隔开)\r\n 各年龄段（6-17、18-24、25-30、31-35、36-40、41+）',
     `date_type`                    int(11)                 NOT NULL COMMENT '日期类型（0：当天数据统计，1：七天数据统计，2，三十天数据统计）',
     `commodity_id`                 bigint(20) unsigned              DEFAULT NULL COMMENT '商品id(值为null时表示该视频没有关联商品)',
     `date`                         varchar(255)            NOT NULL COMMENT '数据日期',
-    `create_time`                  datetime                NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '数据创建时间',
-    `update_time`                  datetime                         DEFAULT CURRENT_TIMESTAMP COMMENT '数据修改日期',
+    `create_time`                  datetime                NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '数据创建时间',
+    `update_time`                  datetime                         DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '数据修改日期',
     `status`                       int(11) unsigned        NOT NULL DEFAULT '1' COMMENT '数据状态',
     PRIMARY KEY (`video_id`) USING BTREE
 ) ENGINE = InnoDB
@@ -325,6 +355,30 @@ CREATE TABLE `dy_rpt_video_monitor`
     PRIMARY KEY (`video_id`) USING BTREE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8 COMMENT ='抖音视频监控表';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `dy_rpt_video_proportion`
+--
+
+DROP TABLE IF EXISTS `dy_rpt_video_proportion`;
+/*!40101 SET @saved_cs_client = @@character_set_client */;
+SET character_set_client = utf8mb4;
+CREATE TABLE `dy_rpt_video_proportion`
+(
+    `id`                        bigint(20)   NOT NULL COMMENT '自增ID',
+    `video_id`                  varchar(255) NOT NULL COMMENT '视频ID',
+    `video_hot_word_proportion` varchar(255) NOT NULL COMMENT '视频热词占比( 热词:比例,热词:比例 )',
+    `province_proportion`       varchar(255) NOT NULL COMMENT '省份占比( 省份:比例,省份:比例 )',
+    `city_proportion`           varchar(255) NOT NULL COMMENT '城市占比( 城市:比例,城市:比例 )',
+    `age_proportion`            varchar(255)          DEFAULT NULL COMMENT '各年龄段所占比例(不同年龄段所占比例由 , 分隔开)\r\n 各年龄段（6-17、18-24、25-30、31-35、36-40、41+）',
+    `female_fans_ratio`         decimal(10, 2)        DEFAULT NULL COMMENT '女性观众所占比例',
+    `status`                    int(11)      NOT NULL COMMENT '数据状态',
+    `create_time```             datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '数据创建时间',
+    `update_time`               datetime              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '数据修改时间',
+    PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8 COMMENT ='视频占比表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -359,6 +413,48 @@ CREATE TABLE `ks_rpt_advertising_video_composite`
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `ks_rpt_age_proportion`
+--
+
+DROP TABLE IF EXISTS `ks_rpt_age_proportion`;
+/*!40101 SET @saved_cs_client = @@character_set_client */;
+SET character_set_client = utf8mb4;
+CREATE TABLE `ks_rpt_age_proportion`
+(
+    `expert_comment_age_id` int(11) NOT NULL COMMENT '达人评论年龄id',
+    `associate_id`          bigint(20)   DEFAULT NULL COMMENT '关联id',
+    `age_interval`          varchar(255) DEFAULT NULL COMMENT '评论者年龄区间占比（年龄区间：占比）',
+    `associate_type`        varchar(255) DEFAULT NULL COMMENT '关联类型',
+    `status`                int(11)      DEFAULT NULL COMMENT '状态',
+    `create_time`           datetime     DEFAULT CURRENT_TIMESTAMP COMMENT '添加时间',
+    `update_time`           datetime     DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY (`expert_comment_age_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ks_rpt_area_proportion`
+--
+
+DROP TABLE IF EXISTS `ks_rpt_area_proportion`;
+/*!40101 SET @saved_cs_client = @@character_set_client */;
+SET character_set_client = utf8mb4;
+CREATE TABLE `ks_rpt_area_proportion`
+(
+    `area_proportion_id` int(11)      DEFAULT NULL COMMENT '地域占比id',
+    `associate_id`       varchar(255) DEFAULT NULL COMMENT '关联id',
+    `province`           varchar(255) DEFAULT NULL COMMENT '省份占比（省份：占比）',
+    `city`               varchar(255) DEFAULT NULL COMMENT '城市占比（城市：占比）',
+    `associate_type`     varchar(255) DEFAULT NULL COMMENT '关联类型（视频/达人）',
+    `status`             int(11)      DEFAULT NULL COMMENT '状态',
+    `create_time`        datetime     DEFAULT CURRENT_TIMESTAMP COMMENT '添加时间',
+    `update_time`        datetime     DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8 COMMENT ='地域占比表';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `ks_rpt_expert`
 --
 
@@ -387,8 +483,10 @@ CREATE TABLE `ks_rpt_expert`
     `like_number`                        bigint(20)              NOT NULL COMMENT '点赞数',
     `like_increment`                     int(11)                 NOT NULL COMMENT '点赞增量',
     `like_speed_increase`                decimal(10, 2)          NOT NULL COMMENT '点赞增速',
+    `comment_number`                     bigint(20) unsigned     NOT NULL COMMENT '评论数',
     `comment_increment`                  int(11) unsigned        NOT NULL COMMENT '评论增量',
     `comment_speed_increase`             decimal(10, 2) unsigned NOT NULL COMMENT '评论增速',
+    `play_number`                        bigint(20) unsigned     NOT NULL COMMENT '播放数',
     `play_increment`                     int(11) unsigned        NOT NULL COMMENT '播放增量',
     `play_speed_increase`                decimal(10, 2) unsigned NOT NULL COMMENT '播放增速',
     `video_average_like_number`          bigint(20) unsigned     NOT NULL COMMENT '视频均赞数',
@@ -400,7 +498,7 @@ CREATE TABLE `ks_rpt_expert`
     `expert_province`                    varchar(255)            NOT NULL COMMENT '达人所在省份',
     `expert_city`                        varchar(255)            NOT NULL COMMENT '达人所在城市',
     `account_verification`               varchar(255)            NOT NULL COMMENT '账号认证',
-    `female_fan_ratio`                   int(11) unsigned        NOT NULL COMMENT '女性粉丝比例区间（0:10%以下,1:10%~20%,2:20%~30%,3:30~40%,4:40%~50%,5:50%~60%,6:60%~70%,7:70%~80%,8:80%~90%,9:90%+）',
+    `female_fan_ratio`                   int(11) unsigned        NOT NULL COMMENT '女性粉丝比例区间',
     `fan_age_range`                      int(11) unsigned        NOT NULL COMMENT '粉丝年龄区间（0:0~17,1:18~24,2:25~30,3:31~35,4:36~40,5:41+）',
     `fan_province`                       varchar(255)            NOT NULL COMMENT '粉丝所在最多省份',
     `fan_city`                           varchar(255)            NOT NULL COMMENT '粉丝所在最多城市',
@@ -493,7 +591,7 @@ CREATE TABLE `ks_rpt_expert_live_broadcast`
     `expert_province`                    varchar(255)            NOT NULL COMMENT '达人所在省份',
     `expert_city`                        varchar(255)            NOT NULL COMMENT '达人所在城市',
     `account_verification`               varchar(255)                     DEFAULT NULL COMMENT '账号认证',
-    `female_fan_ratio`                   int(11) unsigned        NOT NULL COMMENT '女性粉丝比例区间（0:10%以下,1:10%~20%,2:20%~30%,3:30~40%,4:40%~50%,5:50%~60%,6:60%~70%,7:70%~80%,8:80%~90%,9:90%+）',
+    `female_fan_ratio`                   int(11) unsigned        NOT NULL COMMENT '女性粉丝比例区间',
     `fan_age_range`                      int(11) unsigned        NOT NULL COMMENT '粉丝年龄区间（0:0~17,1:18~24,2:25~30,3:31~35,4:36~40,5:41+）',
     `fan_province`                       varchar(255)            NOT NULL COMMENT '粉丝所在最多省份',
     `fan_city`                           varchar(255)            NOT NULL COMMENT '粉丝所在最多城市',
@@ -506,6 +604,29 @@ CREATE TABLE `ks_rpt_expert_live_broadcast`
     PRIMARY KEY (`expert_live_broadcast_id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8 COMMENT ='达人直播榜';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ks_rpt_expert_proportion`
+--
+
+DROP TABLE IF EXISTS `ks_rpt_expert_proportion`;
+/*!40101 SET @saved_cs_client = @@character_set_client */;
+SET character_set_client = utf8mb4;
+CREATE TABLE `ks_rpt_expert_proportion`
+(
+    `expert_proportion_id` int(11)                 NOT NULL COMMENT '达人占比id',
+    `user_id`              bigint(20)              NOT NULL COMMENT '用户id',
+    `province_proportion`  varchar(255)            NOT NULL COMMENT '省份占比( 省份:比例,省份:比例 )',
+    `city_proportion`      varchar(255)            NOT NULL COMMENT '城市占比( 城市:比例,城市:比例 )',
+    `age_proportion`       varchar(255)            NOT NULL COMMENT '年龄段占比',
+    `female_fans_ratio`    decimal(10, 2) unsigned NOT NULL COMMENT '女性粉丝所占比例',
+    `status`               int(11)                 NOT NULL COMMENT '数据状态',
+    `create_time```        datetime                NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '数据创建时间',
+    `update_time`          datetime                         DEFAULT CURRENT_TIMESTAMP COMMENT '数据修改时间',
+    PRIMARY KEY (`expert_proportion_id`) USING BTREE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8 COMMENT ='达人占比表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -662,6 +783,30 @@ CREATE TABLE `ks_rpt_video`
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `ks_rpt_video_proportion`
+--
+
+DROP TABLE IF EXISTS `ks_rpt_video_proportion`;
+/*!40101 SET @saved_cs_client = @@character_set_client */;
+SET character_set_client = utf8mb4;
+CREATE TABLE `ks_rpt_video_proportion`
+(
+    `video_proportion_id`       bigint(20)          NOT NULL COMMENT '视频占比id',
+    `video_id`                  bigint(20) unsigned NOT NULL COMMENT '视频ID',
+    `video_hot_word_proportion` varchar(255)        NOT NULL COMMENT '视频热词占比( 热词:比例,热词:比例 )',
+    `province_proportion`       varchar(255)        NOT NULL COMMENT '省份占比( 省份:比例,省份:比例 )',
+    `city_proportion`           varchar(255)        NOT NULL COMMENT '城市占比( 城市:比例,城市:比例 )',
+    `age_proportion`            varchar(255)        NOT NULL COMMENT '各年龄段所占比例',
+    `female_fans_ratio`         decimal(10, 2)      NOT NULL COMMENT '女性观众所占比例',
+    `status`                    int(11)             NOT NULL COMMENT '数据状态',
+    `create_time```             datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '数据创建时间',
+    `update_time`               datetime                     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '数据修改时间',
+    PRIMARY KEY (`video_proportion_id`) USING BTREE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8 COMMENT ='视频占比表';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `ks_rpt_video_soaring`
 --
 
@@ -743,4 +888,4 @@ SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40101 SET COLLATION_CONNECTION = @OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES = @OLD_SQL_NOTES */;
 
--- Dump completed on 2019-09-09 13:24:48
+-- Dump completed on 2019-09-10 21:31:39
