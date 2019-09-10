@@ -79,12 +79,12 @@ CREATE EXTERNAL TABLE `rlog_douyin_comment`
     `c_nickname`       string COMMENT '评论人昵称',
     `c_img`            string COMMENT '评论人头像',
     `c_url`            string COMMENT '评论人分享地址',
-    `c_time`           bigint COMMENT '评论创建时间',
-    `c_digg_count`     bigint COMMENT '评论获赞数',
+    `c_time`           string COMMENT '评论创建时间',
+    `c_digg_count`     string COMMENT '评论获赞数',
     `is_author_digged` string COMMENT '视频作者是否点赞',
     `c_text`           string COMMENT '评论内容',
-    `reply_count`      bigint COMMENT '评论回复数',
-    `create_time`      bigint COMMENT '爬取时间，10位时间戳，爬虫提供'
+    `reply_count`      string COMMENT '评论回复数',
+    `create_time`      string COMMENT '爬取时间，10位时间戳，爬虫提供'
 ) COMMENT '抖音-评论-原始日志'
     PARTITIONED BY (
         `dt` string,
@@ -202,19 +202,22 @@ CREATE TABLE `log_douyin_user`
 --抖音评论原始日志
 CREATE TABLE `log_douyin_comment`
 (
-    `cid`              string COMMENT '评论ID',
-    `aweme_id`         string COMMENT '视频ID',
-    `user_id`          string COMMENT '评论人ID',
-    `sec_user_id`      string COMMENT '评论人ID2,页面跳转用',
-    `c_nickname`       string COMMENT '评论人昵称',
-    `c_img`            string COMMENT '评论人头像',
-    `c_url`            string COMMENT '评论人分享地址',
-    `c_time`           bigint COMMENT '评论创建时间',
-    `c_digg_count`     bigint COMMENT '评论获赞数',
-    `is_author_digged` string COMMENT '视频作者是否点赞',
-    `c_text`           string COMMENT '评论内容',
-    `reply_count`      bigint COMMENT '评论回复数',
-    `create_time`      bigint COMMENT '爬取时间，10位时间戳，爬虫提供'
+    `cid`                string COMMENT '评论ID',
+    `aweme_id`           string COMMENT '视频ID',
+    `user_id`            string COMMENT '评论人ID',
+    `sec_user_id`        string COMMENT '评论人ID2,页面跳转用',
+    `c_nickname`         string COMMENT '评论人昵称',
+    `c_img`              string COMMENT '评论人头像',
+    `c_url`              string COMMENT '评论人分享地址',
+    `c_time`             bigint COMMENT '评论创建时间',
+    `c_digg_count`       bigint COMMENT '评论获赞数',
+    `is_author_digged`   string COMMENT '视频作者是否点赞',
+    `c_text`             string COMMENT '评论内容',
+    `reply_count`        bigint COMMENT '评论回复数',
+    `create_time`        bigint COMMENT '爬取时间，10位时间戳，爬虫提供',
+    `r_c_digg_count`     string COMMENT '未清洗评论获赞数',
+    `r_is_author_digged` string COMMENT '未清洗视频作者是否点赞',
+    `r_reply_count`      string COMMENT '未清洗评论回复数'
 ) COMMENT '抖音-评论-清洗日志'
     PARTITIONED BY (
         `dt` string,

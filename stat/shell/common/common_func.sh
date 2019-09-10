@@ -203,3 +203,39 @@ function clean_douyin_user_log() {
        WHERE dt='$_dt' and hh='$_hour'
   "
 }
+
+# 清洗抖音comment日志
+function clean_douyin_comment_log() {
+  if [ $# -ne 2 ]; then
+    log "wrong parameters:$@"
+    log 'usage:   clean_video_log dt hh'
+    log 'example: add_douyin_partition 20190908 08'
+    exit 1
+  fi
+  _dt=$1
+  _hour=$2
+  hqlStr="
+    INSERT OVERWRITE TABLE log_douyin_comment PARTITION(dt='$_dt', hh='$_hour')
+       SELECT cid
+        , aweme_id
+        , user_id
+        , sec_user_id
+        , c_nickname
+        , c_img
+        , c_url
+        , c_time
+        , case when c_digg_count is null or lower(trim(c_digg_count))='null' or length(trim(c_digg_count))=0 then 0L else cast(c_digg_count as bigint) end as c_digg_count
+        , case when is_author_digged is null or lower(trim(is_author_digged))='null' or length(trim(is_author_digged))=0 then null
+            when lower(trim(is_author_digged))='true' then 1
+            when lower(trim(is_author_digged))='false' then 0
+            else is_author_digged end as is_author_digged
+        , c_text
+        , case when reply_count is null or lower(trim(reply_count))='null' or length(trim(reply_count))=0 then 0L else cast(reply_count as bigint) end as reply_count
+        , create_time
+        , c_digg_count
+        , is_author_digged
+        , reply_count
+       FROM rlog_douyin_comment
+       WHERE dt='$_dt' and hh='$_hour'
+  "
+}
