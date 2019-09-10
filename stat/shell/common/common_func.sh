@@ -107,7 +107,8 @@ function add_douyin_partition() {
 #  echo "${_hql}"
 }
 
-function clean_video_log() {
+# 清洗抖音video日志
+function clean_douyin_video_log() {
   if [ $# -ne 2 ]; then
     log "wrong parameters:$@"
     log 'usage:   clean_video_log dt hh'
@@ -144,6 +145,61 @@ function clean_video_log() {
         , product_id
         , ad_id
        FROM rlog_douyin_video
+       WHERE dt='$_dt' and hh='$_hour'
+  "
+}
+
+# 清洗抖音user日志
+function clean_douyin_user_log() {
+  if [ $# -ne 2 ]; then
+    log "wrong parameters:$@"
+    log 'usage:   clean_video_log dt hh'
+    log 'example: add_douyin_partition 20190908 08'
+    exit 1
+  fi
+  _dt=$1
+  _hour=$2
+  hqlStr="
+    INSERT OVERWRITE TABLE log_douyin_user PARTITION(dt='$_dt', hh='$_hour')
+       SELECT user_id
+        , sec_user_id
+        , unique_id
+        , nickname
+        , case when gender is null or lower(trim(gender))='null' or length(trim(gender))=0 then null else gender end as gender
+        , case when birthday is null or lower(trim(birthday))='null' or length(trim(birthday))=0 then null else birthday end as birthday
+        , signature
+        , case when city is null or lower(trim(city))='null' or length(trim(city))=0 then null else city end as city
+        , cover_img
+        , case when total_favorited is null or lower(trim(total_favorited))='null' or length(trim(total_favorited))=0 then 0L else cast(total_favorited as bigint) end as total_favorited
+        , case when follower_count is null or lower(trim(follower_count))='null' or length(trim(follower_count))=0 then 0L else cast(follower_count as bigint) end as follower_count
+        , case when following_count is null or lower(trim(following_count))='null' or length(trim(following_count))=0 then 0L else cast(following_count as bigint) end as following_count
+        , case when aweme_count is null or lower(trim(aweme_count))='null' or length(trim(aweme_count))=0 then 0L else cast(aweme_count as bigint) end as aweme_count
+        , case when dongtai_count is null or lower(trim(dongtai_count))='null' or length(trim(dongtai_count))=0 then 0L else cast(dongtai_count as bigint) end as dongtai_count
+        , case when favoriting_count is null or lower(trim(favoriting_count))='null' or length(trim(favoriting_count))=0 then 0L else cast(favoriting_count as bigint) end as favoriting_count
+        , head_img
+        , case when custom_verify is null or lower(trim(custom_verify))='null' or length(trim(custom_verify))=0 then null else custom_verify end as custom_verify
+        , case when weibo_verify is null or lower(trim(weibo_verify))='null' or length(trim(weibo_verify))=0 then null else weibo_verify end as weibo_verify
+        , case when enterprise_verify_reason is null or lower(trim(enterprise_verify_reason))='null' or length(trim(enterprise_verify_reason))=0 then null else enterprise_verify_reason end as enterprise_verify_reason
+        , case when is_shop is null or lower(trim(is_shop))='null' or length(trim(is_shop))=0 then null
+            when lower(trim(is_shop))='true' then 1
+            when lower(trim(is_shop))='false' then 0
+            else is_shop end as is_shop
+        , be_followered_uid
+        , create_time
+        , gender
+        , birthday
+        , city
+        , total_favorited
+        , follower_count
+        , following_count
+        , aweme_count
+        , dongtai_count
+        , favoriting_count
+        , custom_verify
+        , weibo_verify
+        , enterprise_verify_reason
+        , is_shop
+       FROM rlog_douyin_user
        WHERE dt='$_dt' and hh='$_hour'
   "
 }
