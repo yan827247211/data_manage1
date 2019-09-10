@@ -111,14 +111,14 @@ function add_douyin_partition() {
 function clean_douyin_video_log() {
   if [ $# -ne 2 ]; then
     log "wrong parameters:$@"
-    log 'usage:   clean_video_log dt hh'
-    log 'example: add_douyin_partition 20190908 08'
+    log 'usage:   clean_douyin_video_log dt hh'
+    log 'example: clean_douyin_video_log 20190908 08'
     exit 1
   fi
   _dt=$1
   _hour=$2
   hqlStr="
-    INSERT OVERWRITE TABLE log_douyin_video PARTITION(dt='$_dt', hh='$_hour')
+    INSERT OVERWRITE TABLE short_video.log_douyin_video PARTITION(dt='$_dt', hh='$_hour')
        SELECT aweme_id
         , user_id
         , sec_user_id
@@ -144,23 +144,24 @@ function clean_douyin_video_log() {
         , room_id
         , product_id
         , ad_id
-       FROM rlog_douyin_video
-       WHERE dt='$_dt' and hh='$_hour'
+       FROM short_video.rlog_douyin_video
+       WHERE dt='$_dt' and hh='$_hour';
   "
+  execHql "$hqlStr"
 }
 
 # 清洗抖音user日志
 function clean_douyin_user_log() {
   if [ $# -ne 2 ]; then
     log "wrong parameters:$@"
-    log 'usage:   clean_video_log dt hh'
-    log 'example: add_douyin_partition 20190908 08'
+    log 'usage:   clean_douyin_user_log dt hh'
+    log 'example: clean_douyin_user_log 20190908 08'
     exit 1
   fi
   _dt=$1
   _hour=$2
   hqlStr="
-    INSERT OVERWRITE TABLE log_douyin_user PARTITION(dt='$_dt', hh='$_hour')
+    INSERT OVERWRITE TABLE short_video.log_douyin_user PARTITION(dt='$_dt', hh='$_hour')
        SELECT user_id
         , sec_user_id
         , unique_id
@@ -199,23 +200,24 @@ function clean_douyin_user_log() {
         , weibo_verify
         , enterprise_verify_reason
         , is_shop
-       FROM rlog_douyin_user
-       WHERE dt='$_dt' and hh='$_hour'
+       FROM short_video.rlog_douyin_user
+       WHERE dt='$_dt' and hh='$_hour';
   "
+  execHql "$hqlStr"
 }
 
 # 清洗抖音comment日志
 function clean_douyin_comment_log() {
   if [ $# -ne 2 ]; then
     log "wrong parameters:$@"
-    log 'usage:   clean_video_log dt hh'
-    log 'example: add_douyin_partition 20190908 08'
+    log 'usage:   clean_douyin_comment_log dt hh'
+    log 'example: clean_douyin_comment_log 20190908 08'
     exit 1
   fi
   _dt=$1
   _hour=$2
   hqlStr="
-    INSERT OVERWRITE TABLE log_douyin_comment PARTITION(dt='$_dt', hh='$_hour')
+    INSERT OVERWRITE TABLE short_video.log_douyin_comment PARTITION(dt='$_dt', hh='$_hour')
        SELECT cid
         , aweme_id
         , user_id
@@ -235,7 +237,8 @@ function clean_douyin_comment_log() {
         , c_digg_count
         , is_author_digged
         , reply_count
-       FROM rlog_douyin_comment
-       WHERE dt='$_dt' and hh='$_hour'
+       FROM short_video.rlog_douyin_comment
+       WHERE dt='$_dt' and hh='$_hour';
   "
+  execHql "$hqlStr"
 }
