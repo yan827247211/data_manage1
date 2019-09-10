@@ -106,3 +106,44 @@ function add_douyin_partition() {
   execHql "$_hql"
 #  echo "${_hql}"
 }
+
+function clean_video_log() {
+  if [ $# -ne 2 ]; then
+    log "wrong parameters:$@"
+    log 'usage:   clean_video_log dt hh'
+    log 'example: add_douyin_partition 20190908 08'
+    exit 1
+  fi
+  _dt=$1
+  _hour=$2
+  hqlStr="
+    INSERT OVERWRITE TABLE log_douyin_video PARTITION(dt='$_dt', hh='$_hour')
+       SELECT aweme_id
+        , user_id
+        , sec_user_id
+        , desc
+        , chat
+        , cover_img
+        , video_create_time
+        , case when digg_count is null or lower(trim(digg_count))='null' or length(trim(digg_count))=0 then 0L else cast(digg_count as bigint) end as digg_count
+        , case when comment_count is null or lower(trim(comment_count))='null' or length(trim(comment_count))=0 then 0L else cast(comment_count as bigint) end as comment_count
+        , case when share_count is null or lower(trim(share_count))='null' or length(trim(share_count))=0 then 0L else cast(share_count as bigint) end as share_count
+        , case when duration is null or lower(trim(duration))='null' or length(trim(duration))=0 then 0L else cast(duration as bigint) end as duration
+        , case when music_id is null or lower(trim(music_id))='null' or length(trim(music_id))=0 then null else music_id end as music_id
+        , case when room_id is null or lower(trim(room_id))='null' or length(trim(room_id))=0 then null else room_id end as room_id
+        , case when product_id is null or lower(trim(product_id))='null' or length(trim(product_id))=0 then null else product_id end as product_id
+        , case when ad_id is null or lower(trim(ad_id))='null' or length(trim(ad_id))=0 then null else ad_id end as ad_id
+        , share_url
+        , create_time
+        , digg_count
+        , comment_count
+        , share_count
+        , duration
+        , music_id
+        , room_id
+        , product_id
+        , ad_id
+       FROM rlog_douyin_video
+       WHERE dt='$_dt' and hh='$_hour'
+  "
+}

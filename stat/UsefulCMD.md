@@ -44,6 +44,11 @@ where rn<=10;
 ``` 
 
 ```hiveql
--- 视频标签
-
+-- 视频赞 转 评论
+select aweme_id, digg_count, comment_count, share_count,create_time,rn from(
+select aweme_id, digg_count, comment_count, share_count, from_unixtime(create_time) as create_time
+, row_number() over (partition by aweme_id order by create_time desc) as rn
+from rlog_douyin_video
+where dt='20190904') a
+limit 100;
 ```
