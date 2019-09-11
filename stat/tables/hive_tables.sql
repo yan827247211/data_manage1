@@ -287,7 +287,7 @@ CREATE TABLE `base_douyin_user`
     STORED AS ORC;
 
 
---抖音用户每日最新数据
+--抖音视频每日最新数据
 CREATE TABLE `base_douyin_video_daily`
 (
     `aweme_id`          string COMMENT '视频ID',
@@ -312,7 +312,32 @@ CREATE TABLE `base_douyin_video_daily`
     `stat_time`         bigint COMMENT '统计时间，10位时间戳，由计算脚本写入'
 ) COMMENT '抖音-视频-每日最新信息'
     PARTITIONED BY (
-        `dt` string,
-        `hh` string
+        `dt` string
         )
+    STORED AS ORC;
+
+--抖音视频全量信息
+CREATE TABLE `base_douyin_video`
+(
+    `aweme_id`          string COMMENT '视频ID',
+    `user_id`           string COMMENT '用户ID',
+    `sec_user_id`       string COMMENT '用户ID，页面跳转用',
+    `desc`              string COMMENT '标题',
+    `chat`              string COMMENT '话题',
+    `cover_img`         string COMMENT '视频封面图',
+    `video_create_time` bigint COMMENT '视频创建时间,10位时间戳',
+    `digg_count`        bigint COMMENT '点赞数',
+    `comment_count`     bigint COMMENT '评论数',
+    `share_count`       bigint COMMENT '转发数',
+    `duration`          bigint COMMENT '视频时长',
+    `music_id`          string COMMENT '音乐ID',
+    `room_id`           string COMMENT '直播房间ID',
+    `product_id`        string COMMENT '商品ID',
+    `ad_id`             string COMMENT '广告ID',
+    `share_url`         string COMMENT '分享视频地址',
+--    `vb_rank`           int COMMENT '今日最热视频排名',
+--    `vb_rank_value`     bigint COMMENT '今日最热视频播放量',
+    `create_time`       bigint COMMENT '爬取时间，10位时间戳，爬虫提供',
+    `stat_time`         bigint COMMENT '统计时间，10位时间戳，由计算脚本写入'
+) COMMENT '抖音-视频-全量信息'
     STORED AS ORC;
