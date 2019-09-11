@@ -341,3 +341,46 @@ CREATE TABLE `base_douyin_video`
     `stat_time`         bigint COMMENT '统计时间，10位时间戳，由计算脚本写入'
 ) COMMENT '抖音-视频-全量信息'
     STORED AS ORC;
+
+--抖音每日增量评论
+CREATE TABLE `base_douyin_comment_daily`
+(
+    `cid`              string COMMENT '评论ID',
+    `aweme_id`         string COMMENT '视频ID',
+    `user_id`          string COMMENT '评论人ID',
+    `sec_user_id`      string COMMENT '评论人ID2,页面跳转用',
+    `c_nickname`       string COMMENT '评论人昵称',
+    `c_img`            string COMMENT '评论人头像',
+    `c_url`            string COMMENT '评论人分享地址',
+    `c_time`           bigint COMMENT '评论创建时间',
+    `c_digg_count`     bigint COMMENT '评论获赞数',
+    `is_author_digged` string COMMENT '视频作者是否点赞',
+    `c_text`           string COMMENT '评论内容',
+    `reply_count`      bigint COMMENT '评论回复数',
+    `create_time`      bigint COMMENT '爬取时间，10位时间戳，爬虫提供',
+    `stat_time`        bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+) COMMENT '抖音-评论-爬虫每日增量信息'
+    PARTITIONED BY (
+        `dt` string
+        )
+    STORED AS ORC;
+
+--抖音评论全量评论信息
+CREATE TABLE `base_douyin_comment`
+(
+    `cid`              string COMMENT '评论ID',
+    `aweme_id`         string COMMENT '视频ID',
+    `user_id`          string COMMENT '评论人ID',
+    `sec_user_id`      string COMMENT '评论人ID2,页面跳转用',
+    `c_nickname`       string COMMENT '评论人昵称',
+    `c_img`            string COMMENT '评论人头像',
+    `c_url`            string COMMENT '评论人分享地址',
+    `c_time`           bigint COMMENT '评论创建时间',
+    `c_digg_count`     bigint COMMENT '评论获赞数',
+    `is_author_digged` string COMMENT '视频作者是否点赞',
+    `c_text`           string COMMENT '评论内容',
+    `reply_count`      bigint COMMENT '评论回复数',
+    `create_time`      bigint COMMENT '爬取时间，10位时间戳，爬虫提供',
+    `stat_time`        bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+) COMMENT '抖音-评论-全量评论信息，数据量大，慎用！'
+    STORED AS ORC;
