@@ -1,13 +1,10 @@
 #!/usr/bin/env bash
 
 ##################################################################
-## 同步短视频项目相关的原始日志到HIVE:                                #
-#    1. 抖音                                                      #
-#    2. 快手                                                      #
-#  to hive                                                       #
+## 计算抖音达人相关数据，含必要的数据同步                              ##                                                    #
 ##################################################################
 ## history:                                                     ##
-##  2019-09-09 YuLei first release                              ##
+##  2019-09-11 YuLei first release                              ##
 ##################################################################
 
 #打印通用信息
@@ -25,16 +22,17 @@ source "$DIR/common/common_var.sh"
 source "$DIR/common/common_func.sh"
 
 # 检查参数
-if [ $# -lt 2 ]; then
+if [ $# -ne 1 ]; then
   log 'wrong parameters!'
-  log 'usage: sync_cos_short_video_rlog.sh 20190909 08 '
+  log 'usage: stat_douyin_user_daily.sh 20190909'
   exit 1
 fi
 
-add_douyin_partition "$@"
+_dt=$1
+#批次号，10位时间戳
+_ts=$(date +%s)
 
+stat_daily_user_info ${_dt} ${_ts}
 check
-log 'finish sync douyin log.'
-
-
+log "daily stat douyin user job done..."
 

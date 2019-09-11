@@ -224,3 +224,35 @@ CREATE TABLE `log_douyin_comment`
         `hh` string
         )
     STORED AS ORC;
+
+--抖音用户每日最新数据
+CREATE TABLE `stat_douyin_user_daily`
+(
+    `user_id`                  string COMMENT '用户ID',
+    `sec_user_id`              string COMMENT '用户ID，页面跳转用',
+    `unique_id`                string COMMENT '抖音号',
+    `nickname`                 string COMMENT '用户名',
+    `gender`                   string COMMENT '性别',
+    `birthday`                 string COMMENT '生日',
+    `signature`                string COMMENT '个性签名',
+    `city`                     string COMMENT '城市',
+    `cover_img`                string COMMENT '背景封面',
+    `total_favorited`          bigint COMMENT '获赞数',
+    `follower_count`           bigint COMMENT '粉丝数',
+    `following_count`          bigint COMMENT '关注数',
+    `aweme_count`              bigint COMMENT '作品数',
+    `dongtai_count`            bigint COMMENT '动态数',
+    `favoriting_count`         bigint COMMENT '喜欢数',
+    `head_img`                 string COMMENT '头像URL',
+    `custom_verify`            string COMMENT '专属认证（定制认证)',
+    `weibo_verify`             string COMMENT '微博认证',
+    `enterprise_verify_reason` string COMMENT '官方认证',
+    `is_shop`                  string COMMENT '是否有商品橱窗',
+    `be_followered_uid`        string COMMENT '被关注用户ID',
+    `create_time`              bigint COMMENT '爬取时间，10位时间戳，爬虫提供',
+    `stat_time`                bigint COMMENT '数据计算时间，10位时间戳'
+) COMMENT '抖音-用户-每日增量用户数据，保存当天最新的日志信息'
+    PARTITIONED BY (
+        `dt` string
+        )
+    STORED AS ORC;
