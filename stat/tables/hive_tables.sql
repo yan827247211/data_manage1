@@ -384,3 +384,21 @@ CREATE TABLE `base_douyin_comment`
     `stat_time`        bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
 ) COMMENT '抖音-评论-全量评论信息，数据量大，慎用！'
     STORED AS ORC;
+
+--抖音视频评论粉丝
+CREATE TABLE `relat_douyin_video_fans`
+(
+    `aweme_id`              string COMMENT '视频ID',
+    `fans_user_id`         string COMMENT '粉丝用户ID',
+    `stat_time`        bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+) COMMENT '抖音-视频评论粉丝，从评论信息中抽取'
+    STORED AS ORC;
+
+--抖音达人粉丝
+CREATE TABLE `relat_douyin_user_fans`
+(
+    `user_id`              string COMMENT '用户ID',
+    `fans_user_id`         string COMMENT '粉丝用户ID',
+    `stat_time`        bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+) COMMENT '抖音-达人粉丝，从评论信息中抽取'
+    STORED AS ORC;
