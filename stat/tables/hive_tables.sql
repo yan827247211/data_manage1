@@ -225,8 +225,8 @@ CREATE TABLE `log_douyin_comment`
         )
     STORED AS ORC;
 
---抖音用户每日最新数据
-CREATE TABLE `stat_douyin_user_daily`
+--抖音用户每日最新数据，只保留当日最新的数据
+CREATE TABLE `base_douyin_user_daily`
 (
     `user_id`                  string COMMENT '用户ID',
     `sec_user_id`              string COMMENT '用户ID，页面跳转用',
@@ -254,5 +254,65 @@ CREATE TABLE `stat_douyin_user_daily`
 ) COMMENT '抖音-用户-每日增量用户数据，保存当天最新的日志信息'
     PARTITIONED BY (
         `dt` string
+        )
+    STORED AS ORC;
+
+--抖音用户全量信息表，用户关联统计信息
+CREATE TABLE `base_douyin_user`
+(
+    `user_id`                  string COMMENT '用户ID',
+    `sec_user_id`              string COMMENT '用户ID，页面跳转用',
+    `unique_id`                string COMMENT '抖音号',
+    `nickname`                 string COMMENT '用户名',
+    `gender`                   string COMMENT '性别',
+    `birthday`                 string COMMENT '生日',
+    `signature`                string COMMENT '个性签名',
+    `city`                     string COMMENT '城市',
+    `cover_img`                string COMMENT '背景封面',
+    `total_favorited`          bigint COMMENT '获赞数',
+    `follower_count`           bigint COMMENT '粉丝数',
+    `following_count`          bigint COMMENT '关注数',
+    `aweme_count`              bigint COMMENT '作品数',
+    `dongtai_count`            bigint COMMENT '动态数',
+    `favoriting_count`         bigint COMMENT '喜欢数',
+    `head_img`                 string COMMENT '头像URL',
+    `custom_verify`            string COMMENT '专属认证（定制认证)',
+    `weibo_verify`             string COMMENT '微博认证',
+    `enterprise_verify_reason` string COMMENT '官方认证',
+    `is_shop`                  string COMMENT '是否有商品橱窗',
+    `be_followered_uid`        string COMMENT '被关注用户ID',
+    `create_time`              bigint COMMENT '爬取时间，10位时间戳，爬虫提供',
+    `stat_time`                bigint COMMENT '数据计算时间，10位时间戳'
+) COMMENT '抖音-用户-全量用户数据'
+    STORED AS ORC;
+
+
+--抖音用户每日最新数据
+CREATE TABLE `base_douyin_video_daily`
+(
+    `aweme_id`          string COMMENT '视频ID',
+    `user_id`           string COMMENT '用户ID',
+    `sec_user_id`       string COMMENT '用户ID，页面跳转用',
+    `desc`              string COMMENT '标题',
+    `chat`              string COMMENT '话题',
+    `cover_img`         string COMMENT '视频封面图',
+    `video_create_time` bigint COMMENT '视频创建时间,10位时间戳',
+    `digg_count`        bigint COMMENT '点赞数',
+    `comment_count`     bigint COMMENT '评论数',
+    `share_count`       bigint COMMENT '转发数',
+    `duration`          bigint COMMENT '视频时长',
+    `music_id`          string COMMENT '音乐ID',
+    `room_id`           string COMMENT '直播房间ID',
+    `product_id`        string COMMENT '商品ID',
+    `ad_id`             string COMMENT '广告ID',
+    `share_url`         string COMMENT '分享视频地址',
+--    `vb_rank`           int COMMENT '今日最热视频排名',
+--    `vb_rank_value`     bigint COMMENT '今日最热视频播放量',
+    `create_time`       bigint COMMENT '爬取时间，10位时间戳，爬虫提供',
+    `stat_time`         bigint COMMENT '统计时间，10位时间戳，由计算脚本写入'
+) COMMENT '抖音-视频-每日最新信息'
+    PARTITIONED BY (
+        `dt` string,
+        `hh` string
         )
     STORED AS ORC;

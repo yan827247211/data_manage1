@@ -24,6 +24,64 @@ echo "Start synchronize short video raw log "
 source "$DIR/common/common_var.sh"
 source "$DIR/common/common_func.sh"
 
+# 定义脚本方法
+# 增加抖音分区
+function add_douyin_partition() {
+  if [ $# -lt 2 ]; then
+    log 'wrong parameters!'
+    log 'usage:   add_douyin_partition dt hh [log_type...]'
+    log 'example: add_douyin_partition 20190908 08'
+    log 'example: add_douyin_partition 20190908 08 video user'
+    exit 1
+  fi
+
+  _ALL_DOUYIN_LOG_TYPES=('video' 'user')
+  _TARGET_LOG_TYPES=("${_ALL_DOUYIN_LOG_TYPES[@]}")
+
+#如果参数数量大于2，则从第三个参数开始，作为需要倒入的日志类型
+  if [ $# -gt 2 ]; then
+    _TARGET_LOG_TYPES=("${@:3}")
+  fi
+
+  _dt=$1
+  _hour=$2
+  _logType=''
+  _table=''
+  _hql=''
+
+  for _logType in "${_TARGET_LOG_TYPES[@]}"; do
+    log "start synchronize douyin.$_logType"
+    case $_logType in
+      video)
+        _table='short_video.rlog_douyin_video'
+        ;;
+      user)
+        _table='short_video.rlog_douyin_user'
+        ;;
+      comment)
+        _table='short_video.rlog_douyin_comment'
+        ;;
+      goods)
+        _table='goods'
+        ;;
+      music)
+        _table='music'
+        ;;
+      ad)
+        _table='ad'
+        ;;
+      *)
+        log "unsuported douyin table $_logType"
+        exit 1
+        ;;
+    esac
+    _hql="${_hql}alter table ${_table} add if not exists partition(dt='${_dt}',hh='${_hour}') location '$COSN_DOUYIN_BUCKET_PATH_PREFIX/$_logType/$_dt/$_hour';"
+  done
+
+  execHql "$_hql"
+#  echo "${_hql}"
+}
+
 # 检查参数
 if [ $# -lt 2 ]; then
   log 'wrong parameters!'
