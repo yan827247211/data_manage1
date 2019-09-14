@@ -62,7 +62,8 @@ function stat_douyin_user_info() {
       , case when b.video_comment_count is null then 0 else b.video_comment_count end as video_comment_count
       , case when b.video_share_count is null then 0 else b.video_share_count end as video_share_count
       , '$_ts'
-      FROM short_video.base_douyin_user a left join short_video.stat_douyin_user_video_info b on (a.user_id=b.user_id)
+      FROM short_video.base_douyin_user a left join short_video.stat_douyin_user_video_info b on (a.user_id=b.user_id and b.dt='$_dt')
+      WHERE b.dt='$_dt';
 
   "
   execHql "$hqlStr"
