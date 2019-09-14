@@ -388,17 +388,83 @@ CREATE TABLE `base_douyin_comment`
 --抖音视频评论粉丝
 CREATE TABLE `relat_douyin_video_fans`
 (
-    `aweme_id`              string COMMENT '视频ID',
-    `fans_user_id`         string COMMENT '粉丝用户ID',
-    `stat_time`        bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+    `aweme_id`     string COMMENT '视频ID',
+    `fans_user_id` string COMMENT '粉丝用户ID',
+    `stat_time`    bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
 ) COMMENT '抖音-视频评论粉丝，从评论信息中抽取'
     STORED AS ORC;
 
 --抖音达人粉丝
 CREATE TABLE `relat_douyin_user_fans`
 (
-    `user_id`              string COMMENT '用户ID',
-    `fans_user_id`         string COMMENT '粉丝用户ID',
-    `stat_time`        bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+    `user_id`      string COMMENT '用户ID',
+    `fans_user_id` string COMMENT '粉丝用户ID',
+    `stat_time`    bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
 ) COMMENT '抖音-达人粉丝，从评论信息中抽取'
+    STORED AS ORC;
+
+--达人信息统计表
+CREATE TABLE `stat_douyin_user_info`
+(
+    `user_id`             string COMMENT '用户ID',
+    `total_favorited`     bigint COMMENT '获赞数',
+    `follower_count`      bigint COMMENT '粉丝数',
+    `following_count`     bigint COMMENT '关注数',
+    `aweme_count`         bigint COMMENT '作品数',
+    `dongtai_count`       bigint COMMENT '动态数',
+    `favoriting_count`    bigint COMMENT '喜欢数',
+    `video_count`         bigint COMMENT '视频数量，统计自视频接口',
+    `video_digg_count`    bigint COMMENT '达人视频获赞数，统计自视频接口',
+    `video_comment_count` bigint COMMENT '达人视频评论数，统计自视频接口',
+    `video_share_count`   bigint COMMENT '达人视频分享数， 统计自视频接口',
+    `stat_time`           bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+) COMMENT '抖音-达人统计信息'
+    PARTITIONED BY (
+        `dt` string
+        )
+    STORED AS ORC;
+
+--达人视频信息统计表
+CREATE TABLE `stat_douyin_user_video_info`
+(
+    `user_id`             string COMMENT '用户ID',
+    `video_count`         string COMMENT '视频数量',
+    `video_digg_count`    bigint COMMENT '达人视频评论数',
+    `video_comment_count` bigint COMMENT '达人视频评论数',
+    `video_share_count`   bigint COMMENT '达人视频分享数',
+    `stat_time`           bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+) COMMENT '抖音-达人视频信息统计信息'
+    PARTITIONED BY (
+        `dt` string
+        )
+    STORED AS ORC;
+
+--达人粉丝统计信息表
+CREATE TABLE `stat_douyin_user_fans_info`
+(
+    `user_id`         string COMMENT '用户ID',
+    `fans_age_seg`    int COMMENT '粉丝主要年龄区间，1：6-17、2：18-24、3：25-30、4：31-35、5：36-40、6：41+',
+    `fans_province`   string COMMENT '粉丝主要省份信息',
+    `fans_city`       string COMMENT '粉丝主要城市信息',
+    `female_rate_seg` int COMMENT '女粉丝占比区间,0：10%以下、1：10%-20%、2：20%-30%、3：30%-40%，4：40%-50%，5：50%-60%，6：60%-70%，7：70%-80%，8：80%-90%，9：90%以上',
+    `stat_time`       bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+) COMMENT '抖音-达人统计信息'
+    PARTITIONED BY (
+        `dt` string
+        )
+    STORED AS ORC;
+
+--达人粉丝统计信息表
+CREATE TABLE `stat_douyin_user_fans_detail`
+(
+    `user_id`    string COMMENT '用户ID',
+    `prop_rank`  int COMMENT '属性分布排名',
+    `prop_key`   string COMMENT '属性key',
+    `prop_count` bigint COMMENT '属性key数量',
+    `stat_time`  bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+) COMMENT '抖音-用户粉丝属性明细'
+    PARTITIONED BY (
+        `dt` string,
+        `prop_type` string COMMENT '属性类型，age:年龄，gender:性别 city:城市，province:省份'
+        )
     STORED AS ORC;

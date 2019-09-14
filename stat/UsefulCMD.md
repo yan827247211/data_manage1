@@ -52,3 +52,49 @@ from rlog_douyin_video
 where dt='20190904') a
 limit 100;
 ```
+
+
+```hiveql
+--粉丝信息
+select a.user_id, a.age, null as province,  b.city, c.female_rate, '$_ts' from (
+    select user_id, concat(cast(age0*100/total as decimal(10,2)), '%, '
+    	, cast(age1*100/total as decimal(10,2)), '%, '
+    	, cast(age2*100/total as decimal(10,2)), '%, '
+    	, cast(age3*100/total as decimal(10,2)), '%, '
+    	, cast(age4*100/total as decimal(10,2)), '%, '
+    	, cast(age5*100/total as decimal(10,2)), '%, '
+    	, cast(age6*100/total as decimal(10,2)), '%') as age
+    from (
+        select user_id, sum(case when cast(prop_key as int) between 6 and 17 then prop_count else 0 end)
+        , sum(case when prop_key='-1' then prop_count else 0 end) as age0
+        , sum(case when cast(prop_key as int) between 6 and 17 then prop_count else 0 end) as age1
+        , sum(case when cast(prop_key as int) between 18 and 24 then prop_count else 0 end) as age2
+        , sum(case when cast(prop_key as int) between 25 and 30 then prop_count else 0 end) as age3
+        , sum(case when cast(prop_key as int) between 31 and 35 then prop_count else 0 end) as age4
+        , sum(case when cast(prop_key as int) between 36 and 41 then prop_count else 0 end) as age5
+        , sum(case when cast(prop_key as int)>41 then prop_count else 0 end) as age6
+        , sum(prop_count) as total
+        from short_video.stat_douyin_user_fans_detail
+        where dt='$_dt' and prop_type='age'
+    	group by user_id
+    ) aa
+) a left join (
+	select user_id, concat_ws(',',collect_set(concat_ws(':', city, par))) as city from (
+		select user_id, city, concat(cast(cnt*100/sum(cnt) over (partition by user_id) as decimal(10,2)),'%') as par from ( 
+			select user_id
+				, case when prop_rank>20 then '其他' when prop_key='-1' then '未知' else prop_key end as city
+				, sum(prop_count) cnt
+			from short_video.stat_douyin_user_fans_detail
+			where dt='$_dt' and prop_type='city'
+			group by user_id, case when prop_rank>20 then '其他' when prop_key='-1' then '未知' else prop_key end) bb) bbb
+	group by user_id) b on (a.user_id=b.user_id)
+    left join (
+        select user_id, cast(female*100/total as decimal(10,2)) as female_rate
+        from (
+	        select user_id, sum(case when prop_key='2' then prop_count else 0 end) as female, sum(prop_count) as total
+	        from short_video.stat_douyin_user_fans_detail
+	        where dt='$_dt' and prop_type='gender'
+	        group by user_id
+	    ) cc
+    ) c on (a.user_id=c.user_id)
+```
