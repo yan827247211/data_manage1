@@ -50,7 +50,38 @@ function execHql() {
   ${HIVE_BIN} -e "$hqlStr"
 }
 
+#执行MySQL命令，并将结果导出到本地路径
+function exportSQL2Local() {
+  if [ $# -ne 2 ]; then
+    log "USAGE: exportSQL2Local sql localpath"
+    exit;
+  fi
 
+  sqlStr=$1
+  localPath=$2
+  ${MYSQL_BIN} -h${MYSQL_HOST} -P${MYSQL_PORT} -u${MYSQL_USER} -p${MYSQL_PWD} ${MYSQL_DBNAME} -N -e "${sqlStr}" > ${localPath}
+}
+
+#导出hive命令的执行结果到本地路径
+function exportSQL2Local() {
+  if [ $# -ne 2 ]; then
+    log "USAGE: exportSQL2Local hiveql localpath"
+    exit;
+  fi
+
+  _hql=$1
+  _localpath=$2
+  _job_dt=`date '+%Y-%m-%d'`
+  _job_time=`date '+%H_%M_%S'`
+  # for safty
+  _insert_local_hql="INSERT OVERWRITE DIRECTORY '/home/hadoop/yulei/shell/data/$_localpath/$_job_dt/$_job_time/'
+    ROW FORMAT DELIMITED
+    FIELDS TERMINATED BY '\t'
+    $_hql
+    "
+   execHql "$_insert_local_hql"
+
+}
 
 
 
