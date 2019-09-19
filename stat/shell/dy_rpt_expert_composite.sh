@@ -37,7 +37,7 @@ function stat_dy_rpt_expert_composite() {
   _formated_anchordt=`date -d "$_anchordt" "+%Y-%m-%d"`
   log "_anchordt=$_anchordt, _comparedt=$_comparedt, ts=$_ts, _formated_anchordt=$_formated_anchordt"
   hqlStr="
-      select concat_ws('_',a.user_id,'$_data_type') as id
+      select concat_ws('_',a.user_id,'$_anchordt','$_data_type') as id
         , a.user_id as uid
         , b.unique_id as unique_id
         , 1 as ranking
