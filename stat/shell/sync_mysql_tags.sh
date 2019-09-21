@@ -27,9 +27,9 @@ _tmp_export_path_prefix=$DIR/data/$SCRIPT_NAME/$_run_dt
 # 引入脚本方法
 function sync_mysql_label() {
     label_sql="
-        select id, label_name, status, create_time, update_time
-        from video_public.label
-        where status=0
+        SELECT id, label_name, status, create_time, update_time
+        FROM video_public.label
+        WHERE status=0
     "
     _tmp_local_path="$_tmp_export_path_prefix/video_public_label"
     # 目录不存在则创建目录
@@ -50,4 +50,33 @@ function sync_mysql_label() {
     fi
 }
 
+function sync_mysql_user_label() {
+    user_label_sql="
+        SELECT id, user_id, label_id, status, create_time, update_time
+        FROM video_public.user_label
+        WHERE status=0
+    "
+    _tmp_local_path="$_tmp_export_path_prefix/video_public_user_label"
+    # 目录不存在则创建目录
+    if [ ! -d "$_tmp_export_path_prefix" ]; then
+        mkdir -p "$_tmp_export_path_prefix"
+    fi
+    log "export path:$_tmp_local_path"
+    exportSQL2Local "$user_label_sql" "$_tmp_local_path"
+    check 'load user_label from mysql to local'
+
+# 导出文件存在则执行导入，否则报错
+    if [ -f "$_tmp_local_path" ]; then
+      _load_sql="LOAD DATA LOCAL INPATH '$_tmp_local_path' OVERWRITE into table short_video.biz_user_label;"
+      execHql "$_load_sql"
+      check 'load user_label data to hive'
+    else
+      log "load label data failed, $_tmp_local_path is not exist."
+    fi
+}
+
+
+
 sync_mysql_label
+
+sync_mysql_user_label
