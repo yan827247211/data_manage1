@@ -158,6 +158,38 @@ function clean_douyin_comment_log() {
   execHql "$hqlStr"
 }
 
+# 清洗抖音goods日志
+function clean_douyin_goods_log() {
+  if [ $# -ne 2 ]; then
+    log "wrong parameters:$@"
+    log 'usage:   clean_douyin_goods_log dt hh'
+    log 'example: clean_douyin_goods_log 20190908 08'
+    exit 1
+  fi
+  _dt=$1
+  _hour=$2
+  hqlStr="
+    INSERT OVERWRITE TABLE short_video.log_douyin_goods PARTITION(dt='$_dt', hh='$_hour')
+       SELECT product_id
+        , case when promotion_id is null or lower(trim(promotion_id))='null' or length(trim(promotion_id))=0 then null else promotion_id end as promotion_id
+        , case when user_id is null or lower(trim(user_id))='null' or length(trim(user_id))=0 then null else user_id end as user_id
+        , case when product_title is null or lower(trim(product_title))='null' or length(trim(product_title))=0 then null else product_title end as product_title
+        , case when product_img is null or lower(trim(product_img))='null' or length(trim(product_img))=0 then null else product_img end as product_img
+        , case when market_price is null or lower(trim(market_price))='null' or length(trim(market_price))=0 then 0 else cast(market_price as bigint) end as market_price
+        , case when price is null or lower(trim(price))='null' or length(trim(price))=0 then 0 else cast(price as bigint) end as price
+        , case when sales is null or lower(trim(sales))='null' or length(trim(sales))=0 then 0 else cast(sales as bigint) end as sales
+        , case when visit_count is null or lower(trim(visit_count))='null' or length(trim(visit_count))=0 then 0 else cast(visit_count as bigint) end as visit_count
+        , case when detail_url is null or lower(trim(detail_url))='null' or length(trim(detail_url))=0 then null else detail_url end as detail_url
+        , case when rank is null or lower(trim(rank))='null' or length(trim(rank))=0 then 0 else cast(rank as int) end as rank
+        , case when score is null or lower(trim(score))='null' or length(trim(score))=0 then 0 else cast(score as int) end as score
+        , case when cid is null or lower(trim(cid))='null' or length(trim(cid))=0 then null else cid end as cid
+        , create_time
+       FROM short_video.rlog_douyin_goods
+       WHERE dt='$_dt' and hh='$_hour';
+  "
+  execHql "$hqlStr"
+}
+
 # 检查参数
 if [ $# -lt 2 ]; then
   log 'wrong parameters!'
@@ -188,7 +220,7 @@ for _logType in "${_TARGET_CLEAN_LOG_TYPES[@]}"; do
         clean_douyin_comment_log $_dt $_hour
         ;;
       goods)
-        log "goods clean script is under develop."
+        clean_douyin_goods_log $_dt $_hour
         ;;
       music)
         log "music clean script is under develop."

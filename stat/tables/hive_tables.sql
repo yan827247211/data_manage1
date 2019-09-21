@@ -96,6 +96,34 @@ CREATE EXTERNAL TABLE `rlog_douyin_comment`
     STORED AS TEXTFILE
     LOCATION 'cosn://douyin-emr/comment';
 
+--抖音商品原始日志
+CREATE EXTERNAL TABLE `rlog_douyin_goods`
+(
+    `product_id`    string COMMENT '商品ID',
+    `promotion_id`  string COMMENT '商品推销id',
+    `user_id`       string COMMENT '用户ID',
+    `product_title` string COMMENT '商品标题',
+    `product_img`   string COMMENT '商品图片',
+    `market_price`  string COMMENT '商品原价',
+    `price`         string COMMENT '商品现价',
+    `sales`         string COMMENT '商品销量',
+    `visit_count`   string COMMENT '商品访问量（查看该商品人数）',
+    `detail_url`    string COMMENT '商品购买地址',
+    `rank`          string COMMENT '当前排名（针对好物榜）',
+    `score`         string COMMENT '当前人气值（针对好物榜）',
+    `cid`           string COMMENT '商品所属榜单id（针对好物榜）',
+    `create_time`   string COMMENT '爬取时间'
+) COMMENT '抖音-商品-原始日志'
+    PARTITIONED BY (
+        `dt` string,
+        `hh` string
+        )
+    ROW FORMAT DELIMITED
+        FIELDS TERMINATED BY '\t'
+        LINES TERMINATED BY '\n'
+    STORED AS TEXTFILE
+    LOCATION 'cosn://douyin-emr/goods';
+
 --抖音音乐原始日志 日志格式貌似不对，需要确认
 CREATE TABLE `rlog_douyin_music`
 (
@@ -218,6 +246,30 @@ CREATE TABLE `log_douyin_comment`
     `r_c_digg_count`     string COMMENT '未清洗评论获赞数',
     `r_is_author_digged` string COMMENT '未清洗视频作者是否点赞',
     `r_reply_count`      string COMMENT '未清洗评论回复数'
+) COMMENT '抖音-评论-清洗日志'
+    PARTITIONED BY (
+        `dt` string,
+        `hh` string
+        )
+    STORED AS ORC;
+
+--抖音商品清洗日志日志
+CREATE TABLE `log_douyin_goods`
+(
+    `product_id`    string COMMENT '商品ID',
+    `promotion_id`  string COMMENT '商品推销id',
+    `user_id`       string COMMENT '用户ID',
+    `product_title` string COMMENT '商品标题',
+    `product_img`   string COMMENT '商品图片',
+    `market_price`  bigint COMMENT '商品原价',
+    `price`         bigint COMMENT '商品现价',
+    `sales`         bigint COMMENT '商品销量',
+    `visit_count`   bigint COMMENT '商品访问量（查看该商品人数）',
+    `detail_url`    string COMMENT '商品购买地址',
+    `rank`          int COMMENT '当前排名（针对好物榜）',
+    `score`         int COMMENT '当前人气值（针对好物榜）',
+    `cid`           string COMMENT '商品所属榜单id（针对好物榜）',
+    `create_time`   bigint COMMENT '爬取时间'
 ) COMMENT '抖音-评论-清洗日志'
     PARTITIONED BY (
         `dt` string,
@@ -383,6 +435,51 @@ CREATE TABLE `base_douyin_comment`
     `create_time`      bigint COMMENT '爬取时间，10位时间戳，爬虫提供',
     `stat_time`        bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
 ) COMMENT '抖音-评论-全量评论信息，数据量大，慎用！'
+    STORED AS ORC;
+
+--抖音商品每日增量表
+CREATE TABLE `base_douyin_goods_daily`
+(
+    `product_id`    string COMMENT '商品ID',
+    `promotion_id`  string COMMENT '商品推销id',
+    `user_id`       string COMMENT '用户ID',
+    `product_title` string COMMENT '商品标题',
+    `product_img`   string COMMENT '商品图片',
+    `market_price`  bigint COMMENT '商品原价',
+    `price`         bigint COMMENT '商品现价',
+    `sales`         bigint COMMENT '商品销量',
+    `visit_count`   bigint COMMENT '商品访问量（查看该商品人数）',
+    `detail_url`    string COMMENT '商品购买地址',
+    `rank`          int COMMENT '当前排名（针对好物榜）',
+    `score`         int COMMENT '当前人气值（针对好物榜）',
+    `cid`           string COMMENT '商品所属榜单id（针对好物榜）',
+    `create_time`   bigint COMMENT '爬取时间,10位时间戳,爬虫提供',
+    `stat_time`        bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+) COMMENT '抖音-商品-爬虫每日增量信息'
+    PARTITIONED BY (
+        `dt` string
+        )
+    STORED AS ORC;
+
+--抖音商品每日全量表
+CREATE TABLE `base_douyin_goods`
+(
+    `product_id`    string COMMENT '商品ID',
+    `promotion_id`  string COMMENT '商品推销id',
+    `user_id`       string COMMENT '用户ID',
+    `product_title` string COMMENT '商品标题',
+    `product_img`   string COMMENT '商品图片',
+    `market_price`  bigint COMMENT '商品原价',
+    `price`         bigint COMMENT '商品现价',
+    `sales`         bigint COMMENT '商品销量',
+    `visit_count`   bigint COMMENT '商品访问量（查看该商品人数）',
+    `detail_url`    string COMMENT '商品购买地址',
+    `rank`          int COMMENT '当前排名（针对好物榜）',
+    `score`         int COMMENT '当前人气值（针对好物榜）',
+    `cid`           string COMMENT '商品所属榜单id（针对好物榜）',
+    `create_time`   bigint COMMENT '爬取时间,10位时间戳,爬虫提供',
+    `stat_time`        bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+) COMMENT '抖音-商品-爬虫每日全量信息'
     STORED AS ORC;
 
 --抖音视频评论粉丝

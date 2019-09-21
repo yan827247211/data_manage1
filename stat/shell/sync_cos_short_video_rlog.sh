@@ -35,7 +35,7 @@ function add_douyin_partition() {
     exit 1
   fi
 
-  _ALL_DOUYIN_LOG_TYPES=('video' 'user')
+  _ALL_DOUYIN_LOG_TYPES=('video' 'user' 'goods')
   _TARGET_LOG_TYPES=("${_ALL_DOUYIN_LOG_TYPES[@]}")
 
 #如果参数数量大于2，则从第三个参数开始，作为需要倒入的日志类型
@@ -62,7 +62,7 @@ function add_douyin_partition() {
         _table='short_video.rlog_douyin_comment'
         ;;
       goods)
-        _table='goods'
+        _table='short_video.rlog_douyin_goods'
         ;;
       music)
         _table='music'
