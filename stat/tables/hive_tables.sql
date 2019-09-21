@@ -454,7 +454,7 @@ CREATE TABLE `base_douyin_goods_daily`
     `score`         int COMMENT '当前人气值（针对好物榜）',
     `cid`           string COMMENT '商品所属榜单id（针对好物榜）',
     `create_time`   bigint COMMENT '爬取时间,10位时间戳,爬虫提供',
-    `stat_time`        bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+    `stat_time`     bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
 ) COMMENT '抖音-商品-爬虫每日增量信息'
     PARTITIONED BY (
         `dt` string
@@ -478,7 +478,7 @@ CREATE TABLE `base_douyin_goods`
     `score`         int COMMENT '当前人气值（针对好物榜）',
     `cid`           string COMMENT '商品所属榜单id（针对好物榜）',
     `create_time`   bigint COMMENT '爬取时间,10位时间戳,爬虫提供',
-    `stat_time`        bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+    `stat_time`     bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
 ) COMMENT '抖音-商品-爬虫每日全量信息'
     STORED AS ORC;
 
@@ -565,3 +565,33 @@ CREATE TABLE `stat_douyin_user_fans_detail`
         `prop_type` string COMMENT '属性类型，age:年龄，gender:性别 city:城市，province:省份'
         )
     STORED AS ORC;
+
+
+-----业务同步表
+--标签表
+CREATE TABLE `biz_label`
+(
+    `id`          string COMMENT '标签id',
+    `label_name`  string COMMENT '标签名称',
+    `status`      int COMMENT '数据状态',
+    `create_time` string COMMENT '数据创建时间',
+    `update_time` string COMMENT '数据更新时间'
+) COMMENT '标签表，来源：video_public.label'
+    ROW FORMAT DELIMITED
+        FIELDS TERMINATED BY '\t'
+        LINES TERMINATED BY '\n'
+    STORED AS TEXTFILE;
+--达人标签表
+CREATE TABLE `biz_user_label`
+(
+    `id`          string COMMENT '关系id',
+    `user_id`     string COMMENT '用户ID',
+    `label_id`    string COMMENT '标签ID',
+    `status`      int COMMENT '数据状态',
+    `create_time` string COMMENT '数据创建时间',
+    `update_time` string COMMENT '数据更新时间'
+) COMMENT '标签表，来源：video_public.user_label'
+    ROW FORMAT DELIMITED
+        FIELDS TERMINATED BY '\t'
+        LINES TERMINATED BY '\n'
+    STORED AS TEXTFILE;

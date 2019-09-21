@@ -155,7 +155,7 @@ function stat_dy_rpt_expert_composite() {
           ) zz
         ) a left join short_video.base_douyin_user b on (a.user_id=b.user_id)
   "
-  exportSQL2Local "$hqlStr" "dy_rpt_expert_composite"
+  exportHQL2Local "$hqlStr" "dy_rpt_expert_composite"
 #    echo "$hqlStr"
 }
 

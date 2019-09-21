@@ -25,6 +25,8 @@ function exportSQL2Local() {
 
   sqlStr=$1
   localPath=$2
+  echo "sql:$1"
+  echo "local_path:$2"
   ${MYSQL_BIN} -h"${MYSQL_REPORT_HOST}" -P"${MYSQL_REPORT_PORT}" -u"${MYSQL_REPORT_USER}" -p"${MYSQL_REPORT_PWD}" "${MYSQL_REPORT_DB}" -N -e "${sqlStr}" >"${localPath}"
 }
 
@@ -50,22 +52,10 @@ function execHql() {
   ${HIVE_BIN} -e "$hqlStr"
 }
 
-#执行MySQL命令，并将结果导出到本地路径
-function exportSQL2Local() {
-  if [ $# -ne 2 ]; then
-    log "USAGE: exportSQL2Local sql localpath"
-    exit;
-  fi
-
-  sqlStr=$1
-  localPath=$2
-  ${MYSQL_BIN} -h${MYSQL_HOST} -P${MYSQL_PORT} -u${MYSQL_USER} -p${MYSQL_PWD} ${MYSQL_DBNAME} -N -e "${sqlStr}" > ${localPath}
-}
-
 #导出hive命令的执行结果到本地路径
-function exportSQL2Local() {
+function exportHQL2Local() {
   if [ $# -ne 2 ]; then
-    log "USAGE: exportSQL2Local hiveql localpath"
+    log "USAGE: exportHQL2Local hiveql localpath"
     exit;
   fi
 
