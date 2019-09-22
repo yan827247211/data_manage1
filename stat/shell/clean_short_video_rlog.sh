@@ -84,6 +84,7 @@ function clean_douyin_user_log() {
         , case when gender is null or lower(trim(gender))='null' or length(trim(gender))=0 then null else gender end as gender
         , case when birthday is null or lower(trim(birthday))='null' or length(trim(birthday))=0 then null else birthday end as birthday
         , signature
+        , case when province is null or lower(trim(province))='null' or length(trim(province))=0 then null else province end as province
         , case when city is null or lower(trim(city))='null' or length(trim(city))=0 then null else city end as city
         , cover_img
         , case when total_favorited is null or lower(trim(total_favorited))='null' or length(trim(total_favorited))=0 then 0L else cast(total_favorited as bigint) end as total_favorited
@@ -100,10 +101,11 @@ function clean_douyin_user_log() {
             when lower(trim(is_shop))='true' then 1
             when lower(trim(is_shop))='false' then 0
             else is_shop end as is_shop
-        , null -- be_followered_uid TODO:old log
-        , be_followered_uid -- create_time TODO:old log
+        , case when be_followered_uid is null or lower(trim(be_followered_uid))='null' or length(trim(be_followered_uid))=0 then null else be_followered_uid end as be_followered_uid
+        , create_time
         , gender
         , birthday
+        , province
         , city
         , total_favorited
         , follower_count
@@ -115,6 +117,7 @@ function clean_douyin_user_log() {
         , weibo_verify
         , enterprise_verify_reason
         , is_shop
+        , be_followered_uid
        FROM short_video.rlog_douyin_user
        WHERE dt='$_dt' and hh='$_hour';
   "

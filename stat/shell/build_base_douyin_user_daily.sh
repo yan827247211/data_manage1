@@ -36,26 +36,26 @@ function calc_base_douyin_user_info() {
   log "dt=$_dt, ts=$_ts"
   hqlStr="
   INSERT OVERWRITE TABLE short_video.base_douyin_user
-  SELECT user_id, sec_user_id, unique_id, nickname, gender, birthday, signature, city, cover_img, total_favorited
+  SELECT user_id, sec_user_id, unique_id, nickname, gender, birthday, signature, province, city, cover_img, total_favorited
     , follower_count, following_count, aweme_count, dongtai_count, favoriting_count, head_img, custom_verify
     , weibo_verify, enterprise_verify_reason, is_shop, be_followered_uid, create_time, '$_ts'
   FROM (
-      SELECT user_id, sec_user_id, unique_id, nickname, gender, birthday, signature, city, cover_img, total_favorited
+      SELECT user_id, sec_user_id, unique_id, nickname, gender, birthday, signature, province, city, cover_img, total_favorited
             , follower_count, following_count, aweme_count, dongtai_count, favoriting_count, head_img, custom_verify
-            , weibo_verify, enterprise_verify_reason, is_shop, be_followered_uid, create_time, stat_time
+            , weibo_verify, enterprise_verify_reason, is_shop, be_followered_uid, create_time
             , ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY create_time DESC) AS rn
       FROM (
-                SELECT user_id, sec_user_id, unique_id, nickname, gender, birthday, signature, city, cover_img, total_favorited
+                SELECT user_id, sec_user_id, unique_id, nickname, gender, birthday, signature, province, city, cover_img, total_favorited
                     , follower_count, following_count, aweme_count, dongtai_count, favoriting_count, head_img, custom_verify
-                    , weibo_verify, enterprise_verify_reason, is_shop, be_followered_uid, create_time, stat_time
+                    , weibo_verify, enterprise_verify_reason, is_shop, be_followered_uid, create_time
                 FROM short_video.base_douyin_user_daily
                 WHERE dt='$_dt'
 
                 UNION ALL
 
-                SELECT user_id, sec_user_id, unique_id, nickname, gender, birthday, signature, city, cover_img, total_favorited
+                SELECT user_id, sec_user_id, unique_id, nickname, gender, birthday, signature, province, city, cover_img, total_favorited
                     , follower_count, following_count, aweme_count, dongtai_count, favoriting_count, head_img, custom_verify
-                    , weibo_verify, enterprise_verify_reason, is_shop, be_followered_uid, create_time, stat_time
+                    , weibo_verify, enterprise_verify_reason, is_shop, be_followered_uid, create_time
                 FROM short_video.base_douyin_user
       ) a
   ) b
@@ -77,11 +77,16 @@ function calc_base_douyin_user_daily() {
   log "dt=$_dt, ts=$_ts"
   hqlStr="
   INSERT OVERWRITE TABLE short_video.base_douyin_user_daily PARTITION(dt='$_dt')
-  SELECT user_id, sec_user_id, unique_id, nickname, gender, birthday, signature, city, cover_img, total_favorited
+  SELECT user_id, sec_user_id, unique_id, nickname, gender, birthday, signature, province, city, cover_img, total_favorited
         , follower_count, following_count, aweme_count, dongtai_count, favoriting_count, head_img, custom_verify
         , weibo_verify, enterprise_verify_reason, is_shop, be_followered_uid, create_time, '$_ts'
   FROM (
-        SELECT user_id, sec_user_id, unique_id, nickname, gender, birthday, signature, city, cover_img, total_favorited
+        SELECT user_id, sec_user_id, unique_id, nickname, gender, birthday, signature
+            , case when province is not null then regexp_replace(province, '[省|市]$','')
+                when province is null and city is not null then regexp_replace(city, '[省|市]$','')
+                else null end as province
+            , case when city is not null then regexp_replace(city, '[省|市]$','') else null end as city
+            , cover_img, total_favorited
             , follower_count, following_count, aweme_count, dongtai_count, favoriting_count, head_img, custom_verify
             , weibo_verify, enterprise_verify_reason, is_shop, be_followered_uid, create_time
             , ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY create_time DESC) AS rn

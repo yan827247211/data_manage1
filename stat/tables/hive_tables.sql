@@ -32,7 +32,7 @@ CREATE EXTERNAL TABLE `rlog_douyin_video`
     STORED AS TEXTFILE
     LOCATION 'cosn://douyin-emr/video';
 
---抖音用户原始日志
+--抖音用户原始日志 20号开始有省份
 CREATE EXTERNAL TABLE `rlog_douyin_user`
 (
     `user_id`                  string COMMENT '用户ID',
@@ -42,6 +42,7 @@ CREATE EXTERNAL TABLE `rlog_douyin_user`
     `gender`                   string COMMENT '性别',
     `birthday`                 string COMMENT '生日',
     `signature`                string COMMENT '个性签名',
+    `province`                 string COMMENT '省份',
     `city`                     string COMMENT '城市',
     `cover_img`                string COMMENT '背景封面',
     `total_favorited`          string COMMENT '获赞数',
@@ -191,6 +192,7 @@ CREATE TABLE `log_douyin_user`
     `gender`                     string COMMENT '性别',
     `birthday`                   string COMMENT '生日',
     `signature`                  string COMMENT '个性签名',
+    `province`                   string COMMENT '省份',
     `city`                       string COMMENT '城市',
     `cover_img`                  string COMMENT '背景封面',
     `total_favorited`            bigint COMMENT '获赞数',
@@ -208,6 +210,7 @@ CREATE TABLE `log_douyin_user`
     `create_time`                bigint COMMENT '爬取时间，10位时间戳，爬虫提供',
     `r_gender`                   string COMMENT '未清洗性别',
     `r_birthday`                 string COMMENT '未清洗生日',
+    `r_province`                 string COMMENT '未清洗省份',
     `r_city`                     string COMMENT '未清洗城市',
     `r_total_favorited`          string COMMENT '未清洗获赞数',
     `r_follower_count`           string COMMENT '未清洗粉丝数',
@@ -218,7 +221,8 @@ CREATE TABLE `log_douyin_user`
     `r_custom_verify`            string COMMENT '未清洗专属认证（定制认证)',
     `r_weibo_verify`             string COMMENT '未清洗微博认证',
     `r_enterprise_verify_reason` string COMMENT '未清洗官方认证',
-    `r_is_shop`                  string COMMENT '未清洗是否有商品橱窗'
+    `r_is_shop`                  string COMMENT '未清洗是否有商品橱窗',
+    `r_be_followered_uid`        string COMMENT '未清洗被关注用户ID'
 ) COMMENT '抖音-用户-清洗日志'
     PARTITIONED BY (
         `dt` string,
@@ -287,6 +291,7 @@ CREATE TABLE `base_douyin_user_daily`
     `gender`                   string COMMENT '性别',
     `birthday`                 string COMMENT '生日',
     `signature`                string COMMENT '个性签名',
+    `province`                 string COMMENT '省份',
     `city`                     string COMMENT '城市',
     `cover_img`                string COMMENT '背景封面',
     `total_favorited`          bigint COMMENT '获赞数',
@@ -319,6 +324,7 @@ CREATE TABLE `base_douyin_user`
     `gender`                   string COMMENT '性别',
     `birthday`                 string COMMENT '生日',
     `signature`                string COMMENT '个性签名',
+    `province`                 string COMMENT '省份',
     `city`                     string COMMENT '城市',
     `cover_img`                string COMMENT '背景封面',
     `total_favorited`          bigint COMMENT '获赞数',
