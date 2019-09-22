@@ -572,7 +572,45 @@ CREATE TABLE `stat_douyin_user_fans_detail`
         )
     STORED AS ORC;
 
-
+--视频信息统计表
+CREATE TABLE `stat_douyin_video_info`
+(
+    `aweme_id`      string COMMENT '用户ID',
+    `user_id`       string COMMENT '视频数量',
+    `digg_count`    bigint COMMENT '达人视频评论数',
+    `comment_count` bigint COMMENT '达人视频评论数',
+    `share_count`   bigint COMMENT '达人视频分享数',
+    `stat_time`     bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+) COMMENT '抖音-达人视频信息统计信息'
+    PARTITIONED BY (
+        `dt` string
+        )
+    STORED AS ORC;
+--视频热词统计表
+CREATE TABLE `stat_douyin_video_hotwords`
+(
+    `aweme_id`      string COMMENT '用户ID',
+    `hotwords`       string COMMENT '热词，逗号分隔',
+    `stat_time`     bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+) COMMENT '抖音-达人视频信息统计信息'
+    PARTITIONED BY (
+        `dt` string
+        )
+    STORED AS ORC;
+--视频观众统计信息表
+CREATE TABLE `stat_douyin_video_fans_info`
+(
+    `aweme_id`         string COMMENT '用户ID',
+    `fans_age_seg`    int COMMENT '粉丝主要年龄区间，1：6-17、2：18-24、3：25-30、4：31-35、5：36-40、6：41+',
+    `fans_province`   string COMMENT '粉丝主要省份信息',
+    `fans_city`       string COMMENT '粉丝主要城市信息',
+    `female_rate_seg` int COMMENT '女粉丝占比区间,0：10%以下、1：10%-20%、2：20%-30%、3：30%-40%，4：40%-50%，5：50%-60%，6：60%-70%，7：70%-80%，8：80%-90%，9：90%以上',
+    `stat_time`       bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+) COMMENT '抖音-视频观众统计信息'
+    PARTITIONED BY (
+        `dt` string
+        )
+    STORED AS ORC;
 -----业务同步表
 --标签表
 CREATE TABLE `biz_label`

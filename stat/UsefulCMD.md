@@ -102,6 +102,9 @@ select a.user_id, a.age, null as province,  b.city, c.female_rate, '$_ts' from (
 ```bash
 LOAD DATA local INFILE '/home/hadoop/yulei/shell/000000_0' INTO TABLE video_report.dy_rpt_expert_composite 
 FIELDS TERMINATED BY '\t';
+LOAD DATA local INFILE '/home/hadoop/yulei/shell/video_comp' INTO TABLE video_report.dy_rpt_video_composite 
+FIELDS TERMINATED BY '\t';
+
 
 mysql -h10.0.0.14 -P3306 -uvideo_user -p7zhwaG6nUTJscCpH -Dvideo_report
 ```
