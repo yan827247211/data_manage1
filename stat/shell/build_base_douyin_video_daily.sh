@@ -35,6 +35,13 @@ function calc_base_douyin_video_info() {
   _ts=$2
   log "dt=$_dt, ts=$_ts"
   hqlStr="
+  set mapred.child.java.opts=-Xmx2048m;
+  set mapreduce.map.memory.mb=2048;
+  set mapreduce.reduce.memory.mb=2048;
+  set mapreduce.reduce.shuffle.input.buffer.percent=0.7;
+  set mapreduce.reduce.shuffle.memory.limit.percent=0.1;
+  set mapreduce.reduce.shuffle.merge.percent=0.5;
+  set hive.optimize.skewjoin=true;
   INSERT OVERWRITE TABLE short_video.base_douyin_video
   SELECT aweme_id, user_id, sec_user_id, desc, chat, cover_img, video_create_time, digg_count
         , comment_count, share_count, duration, music_id, room_id, product_id, ad_id, share_url
@@ -80,6 +87,13 @@ function calc_base_douyin_video_daily() {
   _ts=$(date +%s)
   log "dt=$_dt, ts=$_ts"
   hqlStr="
+  set mapred.child.java.opts=-Xmx2048m;
+  set mapreduce.map.memory.mb=2048;
+  set mapreduce.reduce.memory.mb=2048;
+  set mapreduce.reduce.shuffle.input.buffer.percent=0.7;
+  set mapreduce.reduce.shuffle.memory.limit.percent=0.1;
+  set mapreduce.reduce.shuffle.merge.percent=0.5;
+  set hive.optimize.skewjoin=true;
   INSERT OVERWRITE TABLE short_video.base_douyin_video_daily PARTITION(dt='$_dt')
   SELECT aweme_id, user_id, sec_user_id, desc, chat, cover_img, video_create_time, digg_count
             , comment_count, share_count, duration, music_id, room_id, product_id, ad_id, share_url
