@@ -22,7 +22,7 @@ SET @@SESSION.SQL_LOG_BIN = 0;
 --
 
 SET @@GLOBAL.GTID_PURGED = /*!80000 '+'*/ '184fa05c-e231-11e8-a07b-6c92bf5b8f3e:1-16391815,
-1d78b01d-aa04-11e9-b780-18ded7a37962:1-64531,
+1d78b01d-aa04-11e9-b780-18ded7a37962:1-77243,
 25b4f59a-e231-11e8-a07c-6c92bf5b8b32:1-256';
 
 --
@@ -1027,7 +1027,8 @@ CREATE TABLE `ks_rpt_video_soaring`
     `video_cover`                   varchar(255)                       NOT NULL COMMENT '视频封面图',
     `video_title`                   varchar(255) CHARACTER SET utf8mb4 NOT NULL COMMENT '视频标题',
     `video_hot_word`                varchar(255) CHARACTER SET utf8mb4 NOT NULL COMMENT '视频热词',
-    `video_url`                     varchar(255)                       NOT NULL COMMENT '视频链接',
+    `share_userid`                  varchar(255)                       NOT NULL COMMENT '视频播放地址（组合）',
+    `share_photoid`                 varchar(255)                       NOT NULL COMMENT '视频播放地址（组合）',
     `user_id`                       bigint(20) unsigned                NOT NULL COMMENT '用户id',
     `kwai_id`                       varchar(255)                                DEFAULT NULL COMMENT '快手号id',
     `profile_picture`               varchar(255)                       NOT NULL COMMENT '头像',
@@ -1092,4 +1093,4 @@ SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40101 SET COLLATION_CONNECTION = @OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES = @OLD_SQL_NOTES */;
 
--- Dump completed on 2019-09-20 23:26:39
+-- Dump completed on 2019-09-24 18:55:31

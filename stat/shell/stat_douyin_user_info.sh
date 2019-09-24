@@ -56,7 +56,8 @@ function stat_douyin_user_info() {
   log "dt=$_dt, ts=$_ts"
   hqlStr="
       INSERT OVERWRITE TABLE short_video.stat_douyin_user_info PARTITION(dt='$_dt')
-      SELECT a.user_id, a.total_favorited, a.follower_count, a.following_count, a.aweme_count, a.dongtai_count, a.favoriting_count
+      SELECT a.user_id, a.sec_user_id, a.unique_id, a.nickname, a.head_img
+      , a.total_favorited, a.follower_count, a.following_count, a.aweme_count, a.dongtai_count, a.favoriting_count
       , case when b.video_count is null then 0 else b.video_count end as video_count
       , case when b.video_digg_count is null then 0 else b.video_digg_count end as video_digg_count
       , case when b.video_comment_count is null then 0 else b.video_comment_count end as video_comment_count

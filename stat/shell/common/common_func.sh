@@ -47,7 +47,10 @@ function execHql() {
     log "USAGE: execSql hql "
     exit
   fi
-  hqlStr=$1
+  hqlStr="set mapred.child.java.opts=-Xmx2048m;
+          set mapreduce.map.memory.mb=2048;
+          set mapreduce.reduce.memory.mb=2048;
+        "$1
   echo "execHql:$hqlStr"
   ${HIVE_BIN} -e "$hqlStr"
 }

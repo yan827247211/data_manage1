@@ -125,6 +125,75 @@ CREATE EXTERNAL TABLE `rlog_douyin_goods`
     STORED AS TEXTFILE
     LOCATION 'cosn://douyin-emr/goods';
 
+CREATE EXTERNAL TABLE `rlog_douyin_haowu`
+(
+    `product_id`    string COMMENT '商品ID',
+    `promotion_id`  string COMMENT '商品推销id',
+    `user_id`       string COMMENT '用户ID',
+    `product_title` string COMMENT '商品标题',
+    `product_img`   string COMMENT '商品图片',
+    `market_price`  string COMMENT '商品原价',
+    `price`         string COMMENT '商品现价',
+    `sales`         string COMMENT '商品销量',
+    `visit_count`   string COMMENT '商品访问量（查看该商品人数）',
+    `detail_url`    string COMMENT '商品购买地址',
+    `rank`          string COMMENT '当前排名（针对好物榜）',
+    `score`         string COMMENT '当前人气值（针对好物榜）',
+    `cid`           string COMMENT '商品所属榜单id（针对好物榜）',
+    `create_time`   string COMMENT '爬取时间'
+) COMMENT '抖音-好物榜-原始日志'
+    PARTITIONED BY (
+        `dt` string,
+        `hh` string
+        )
+    ROW FORMAT DELIMITED
+        FIELDS TERMINATED BY '\t'
+        LINES TERMINATED BY '\n'
+    STORED AS TEXTFILE
+    LOCATION 'cosn://douyin-emr/haowu';
+
+--清洗后的好物榜
+CREATE TABLE `base_douyin_haowu_daily`
+(
+    `product_id`    string COMMENT '商品ID',
+    `promotion_id`  string COMMENT '商品推销id',
+    `user_id`       string COMMENT '用户ID',
+    `product_title` string COMMENT '商品标题',
+    `product_img`   string COMMENT '商品图片',
+    `market_price`  bigint COMMENT '商品原价',
+    `price`         bigint COMMENT '商品现价',
+    `sales`         bigint COMMENT '商品销量',
+    `visit_count`   bigint COMMENT '商品访问量（查看该商品人数）',
+    `detail_url`    string COMMENT '商品购买地址',
+    `rank`          int COMMENT '当前排名（针对好物榜）',
+    `score`         bigint COMMENT '当前人气值（针对好物榜）',
+    `cid`           string COMMENT '商品所属榜单id（针对好物榜）',
+    `create_time`   bigint COMMENT '爬取时间',
+    `stat_time`     bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+) COMMENT '抖音-好物榜'
+    PARTITIONED BY (
+        `dt` string
+        )
+    STORED AS ORC;
+
+--商品累计上榜天数
+CREATE TABLE `base_douyin_haowu_goods_onlist_count`
+(
+    `product_id` string COMMENT '商品ID',
+    `onlist_cnt` int COMMENT '累计上榜天数（任意榜单）',
+    `stat_time`  bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+) COMMENT '抖音-好物榜-累计上榜天数'
+    STORED AS ORC;
+
+--用户累计上榜天数
+CREATE TABLE `base_douyin_haowu_user_onlist_count`
+(
+    `user_id`    string COMMENT '用户ID',
+    `onlist_cnt` int COMMENT '累计上榜天数（任意榜单）',
+    `stat_time`  bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+) COMMENT '抖音-好物榜-累计上榜天数'
+    STORED AS ORC;
+
 --抖音音乐原始日志 日志格式貌似不对，需要确认
 CREATE TABLE `rlog_douyin_music`
 (
@@ -488,6 +557,31 @@ CREATE TABLE `base_douyin_goods`
 ) COMMENT '抖音-商品-爬虫每日全量信息'
     STORED AS ORC;
 
+--抖音达人带货统计表
+CREATE TABLE `stat_douyin_take_goods`
+(
+    `user_id`       string COMMENT '用户ID',
+    `product_id`    string COMMENT '商品ID',
+    `promotion_id`  string COMMENT '商品推销id',
+    `product_title` string COMMENT '商品标题',
+    `product_img`   string COMMENT '商品图片',
+    `market_price`  bigint COMMENT '商品原价',
+    `price`         bigint COMMENT '商品现价',
+    `sales`         bigint COMMENT '商品销量(抖音全网共享)',
+    `user_sales`    bigint COMMENT '达人商品销量，按点赞比计算',
+    `visit_count`   bigint COMMENT '商品访问量（查看该商品人数）',
+    `detail_url`    string COMMENT '商品购买地址',
+    `rank`          int COMMENT '当前排名（针对好物榜）',
+    `score`         int COMMENT '当前人气值（针对好物榜）',
+    `cid`           string COMMENT '商品所属榜单id（针对好物榜）',
+    `create_time`   bigint COMMENT '爬取时间,10位时间戳,爬虫提供',
+    `stat_time`     bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+) COMMENT '抖音-商品-爬虫每日增量信息'
+    PARTITIONED BY (
+        `dt` string
+        )
+    STORED AS ORC;
+
 --抖音视频评论粉丝
 CREATE TABLE `relat_douyin_video_fans`
 (
@@ -510,6 +604,10 @@ CREATE TABLE `relat_douyin_user_fans`
 CREATE TABLE `stat_douyin_user_info`
 (
     `user_id`             string COMMENT '用户ID',
+    `sec_user_id`         string COMMENT '用户ID，页面跳转用',
+    `unique_id`           string COMMENT '抖音号',
+    `nickname`            string COMMENT '用户名',
+    `head_img`            string COMMENT '头像URL',
     `total_favorited`     bigint COMMENT '获赞数',
     `follower_count`      bigint COMMENT '粉丝数',
     `following_count`     bigint COMMENT '关注数',
@@ -589,9 +687,9 @@ CREATE TABLE `stat_douyin_video_info`
 --视频热词统计表
 CREATE TABLE `stat_douyin_video_hotwords`
 (
-    `aweme_id`      string COMMENT '用户ID',
-    `hotwords`       string COMMENT '热词，逗号分隔',
-    `stat_time`     bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+    `aweme_id`  string COMMENT '用户ID',
+    `hotwords`  string COMMENT '热词，逗号分隔',
+    `stat_time` bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
 ) COMMENT '抖音-达人视频信息统计信息'
     PARTITIONED BY (
         `dt` string
@@ -600,7 +698,7 @@ CREATE TABLE `stat_douyin_video_hotwords`
 --视频观众统计信息表
 CREATE TABLE `stat_douyin_video_fans_info`
 (
-    `aweme_id`         string COMMENT '用户ID',
+    `aweme_id`        string COMMENT '用户ID',
     `fans_age_seg`    int COMMENT '粉丝主要年龄区间，1：6-17、2：18-24、3：25-30、4：31-35、5：36-40、6：41+',
     `fans_province`   string COMMENT '粉丝主要省份信息',
     `fans_city`       string COMMENT '粉丝主要城市信息',
