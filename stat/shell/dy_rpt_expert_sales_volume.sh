@@ -23,12 +23,12 @@ source "$DIR/common/common_func.sh"
 
 # 引入脚本方法
 
-# 计算达人视频统计信息
+# 计算达人带货数据
 function stat_dy_rpt_expert_sales_volume() {
   if [ $# -ne 3 ]; then
     log "wrong parameters:$@"
-    log 'usage:   stat_douyin_user_video_info anchordt comparedt data_type'
-    log 'example: stat_douyin_user_video_info 20190911 20190910 0'
+    log 'usage:   stat_dy_rpt_expert_sales_volume anchordt comparedt data_type'
+    log 'example: stat_dy_rpt_expert_sales_volume 20190911 20190910 0'
     exit 1
   fi
   _anchordt=$1
@@ -38,37 +38,38 @@ function stat_dy_rpt_expert_sales_volume() {
   log "_anchordt=$_anchordt, _comparedt=$_comparedt, ts=$_ts, _formated_anchordt=$_formated_anchordt"
   hqlStr="
       select concat_ws('_', x.user_id,'$_anchordt','0') as id
-        , x.rn as ranking
+        , x.ranking as ranking
         , x.user_id as user_id
         , y.unique_id as unique_id
         , y.head_img as head_portrait
         , y.nickname as nickname
         , y.follower_count as fans_number
-        , 'label' as label
-        , x.product_count as at_sell_commodity_number
-        , x.user_sales as store_sales
-        , x.user_sales_money as shop_sales_amount
-        , 0 as continuous_list
+        , '' as label
+        , x.at_sale_goods as at_sell_commodity_number
+        , x.sales as store_sales
+        , x.sales_amount as shop_sales_amount
+        , onlist_cnt as continuous_list
         , 0 as date_type
         ,'$_anchordt' as dt
+        , null as create_time
+        , null as update_time
+        , null as status
         from (
-        select user_id, product_count, cast(user_sales as bigint) as user_sales, cast(user_sales_money as bigint) as user_sales_money,rn from (
-        select user_id, product_count, user_sales, user_sales_money, row_number() over (order by user_sales desc) as rn from (
-        select rpt.user_id, count(distinct product_id) as product_count, round(sum(total_sales*user_par),0) as user_sales, sum(total_sales*user_par*price) as user_sales_money from (
-        select u.product_id, u.user_id, u.par as user_par, g.price as price, g.sales as total_sales
-        from (
-        select user_id, product_id, digg/sum(digg) over (partition by product_id) as par
-        from (
-         select user_id, product_id, sum(digg_count) as digg
-         from base_douyin_video
-         where product_id is not null
-         group by user_id, product_id
-        ) a) u join base_douyin_goods g on (u.product_id=g.product_id)
-        ) rpt
-        group by rpt.user_id) wrapper)final
-        where rn<=1000)x join base_douyin_user y on (x.user_id=y.user_id)
+            select user_id, at_sale_goods,sales,sales_amount,onlist_cnt,ranking from (
+                select a.user_id, a.at_sale_goods, a.sales, a.sales_amount
+                , case when b.onlist_cnt is null then 0 else b.onlist_cnt end as onlist_cnt,
+                row_number() over (order by case when b.onlist_cnt is null then 0 else b.onlist_cnt end desc, a.sales desc) as ranking
+                from (
+                    select user_id, count(distinct product_id) at_sale_goods, sum(user_sales) sales, cast(sum(user_sales*price/100) as decimal(10,2)) as sales_amount
+                    from short_video.stat_douyin_take_goods
+                    where dt='$_anchordt'
+                    group by user_id
+                ) as a left join short_video.base_douyin_haowu_user_onlist_count b on (a.user_id=b.user_id)
+            ) c
+            where ranking<=1000
+        ) x left join short_video.stat_douyin_user_info y on (x.user_id=y.user_id and y.dt='$_anchordt')
   "
-  exportHQL2Local "$hqlStr" "dy_rpt_expert_composite"
+  exportHQL2Local "$hqlStr" "dy_rpt_expert_sales_volume"
 #    echo "$hqlStr"
 }
 
@@ -95,7 +96,7 @@ _ts=$(date +%s)
 _monthday=`date -d "$_dt" "+%Y%m01"`
 echo "dt=$_dt, oneday_ago=$_oneday_ago, monday=$_monday, monthday=$_monthday"
 
-stat_dy_rpt_expert_composite ${_dt} ${_oneday_ago} 0
+stat_dy_rpt_expert_sales_volume ${_dt} ${_oneday_ago} 0
 #check "stat_douyin_user_video_info ${_dt} ${_ts}"
 
 #log "daily stat douyin user stat job done..."

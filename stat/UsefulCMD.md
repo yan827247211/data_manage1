@@ -106,6 +106,8 @@ LOAD DATA local INFILE '/home/hadoop/yulei/shell/video_comp' INTO TABLE video_re
 FIELDS TERMINATED BY '\t';
 LOAD DATA local INFILE '/home/hadoop/yulei/shell/haowu' INTO TABLE video_report.dy_rpt_good_commodity 
 FIELDS TERMINATED BY '\t';
+LOAD DATA local INFILE '/home/hadoop/yulei/shell/sales' INTO TABLE video_report.dy_rpt_expert_sales_volume 
+FIELDS TERMINATED BY '\t';
 
 
 
