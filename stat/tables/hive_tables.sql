@@ -683,12 +683,26 @@ CREATE TABLE `stat_douyin_user_fans_detail`
 --视频信息统计表
 CREATE TABLE `stat_douyin_video_info`
 (
-    `aweme_id`      string COMMENT '用户ID',
-    `user_id`       string COMMENT '视频数量',
-    `digg_count`    bigint COMMENT '达人视频评论数',
-    `comment_count` bigint COMMENT '达人视频评论数',
-    `share_count`   bigint COMMENT '达人视频分享数',
-    `stat_time`     bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+    `aweme_id`          string COMMENT '视频ID',
+    `user_id`           string COMMENT '用户ID',
+    `sec_user_id`       string COMMENT '用户ID，页面跳转用',
+    `desc`              string COMMENT '标题',
+    `chat`              string COMMENT '话题',
+    `cover_img`         string COMMENT '视频封面图',
+    `video_create_time` bigint COMMENT '视频创建时间,10位时间戳',
+    `digg_count`        bigint COMMENT '点赞数',
+    `comment_count`     bigint COMMENT '评论数',
+    `share_count`       bigint COMMENT '转发数',
+    `duration`          bigint COMMENT '视频时长',
+    `music_id`          string COMMENT '音乐ID',
+    `room_id`           string COMMENT '直播房间ID',
+    `product_id`        string COMMENT '商品ID',
+    `ad_id`             string COMMENT '广告ID',
+    `share_url`         string COMMENT '分享视频地址',
+--    `vb_rank`           int COMMENT '今日最热视频排名',
+--    `vb_rank_value`     bigint COMMENT '今日最热视频播放量',
+    `create_time`       bigint COMMENT '爬取时间，10位时间戳，爬虫提供',
+    `stat_time`         bigint COMMENT '统计时间，10位时间戳，由计算脚本写入'
 ) COMMENT '抖音-达人视频信息统计信息'
     PARTITIONED BY (
         `dt` string
@@ -743,6 +757,53 @@ CREATE TABLE `biz_user_label`
     `create_time` string COMMENT '数据创建时间',
     `update_time` string COMMENT '数据更新时间'
 ) COMMENT '标签表，来源：video_public.user_label'
+    ROW FORMAT DELIMITED
+        FIELDS TERMINATED BY '\t'
+        LINES TERMINATED BY '\n'
+    STORED AS TEXTFILE;
+
+CREATE TABLE `biz_industry`
+(
+    `id`          string COMMENT '行业id',
+    `industry`    string COMMENT '行业名称',
+    `status`      int COMMENT '数据状态',
+    `create_time` string COMMENT '数据创建时间',
+    `update_time` string COMMENT '数据更新时间'
+) COMMENT '标签表，来源：video_public.industry'
+    ROW FORMAT DELIMITED
+        FIELDS TERMINATED BY '\t'
+        LINES TERMINATED BY '\n'
+    STORED AS TEXTFILE;
+
+CREATE TABLE `biz_user_industry`
+(
+    `id`          string COMMENT '关系id',
+    `user_id`     string COMMENT '用户ID',
+    `industry_id`    string COMMENT '标签ID',
+    `status`      int COMMENT '数据状态',
+    `create_time` string COMMENT '数据创建时间',
+    `update_time` string COMMENT '数据更新时间'
+) COMMENT '标签表，来源：video_public.user_industry'
+    ROW FORMAT DELIMITED
+        FIELDS TERMINATED BY '\t'
+        LINES TERMINATED BY '\n'
+    STORED AS TEXTFILE;
+
+CREATE TABLE `dim_user_industry`
+(
+    `user_id`     string COMMENT '用户ID',
+    `industry`    string COMMENT '标签ID'
+) COMMENT '用户行业维度表'
+    ROW FORMAT DELIMITED
+        FIELDS TERMINATED BY '\t'
+        LINES TERMINATED BY '\n'
+    STORED AS TEXTFILE;
+
+CREATE TABLE `dim_user_label`
+(
+    `user_id`     string COMMENT '用户ID',
+    `label`    string COMMENT '标签ID'
+) COMMENT '用户标签维度表'
     ROW FORMAT DELIMITED
         FIELDS TERMINATED BY '\t'
         LINES TERMINATED BY '\n'

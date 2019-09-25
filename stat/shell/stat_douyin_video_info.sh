@@ -36,7 +36,24 @@ function stat_douyin_video_info() {
   log "dt=$_dt, ts=$_ts"
   hqlStr="
       INSERT OVERWRITE TABLE short_video.stat_douyin_video_info PARTITION(dt='$_dt')
-      SELECT aweme_id, user_id, digg_count, comment_count, share_count,'$_ts'
+      SELECT aweme_id
+            , user_id
+            , sec_user_id
+            , desc
+            , chat
+            , cover_img
+            , video_create_time
+            , digg_count
+            , comment_count
+            , share_count
+            , duration
+            , music_id
+            , room_id
+            , product_id
+            , ad_id
+            , share_url
+            , create_time
+            , '$_ts'
       FROM short_video.base_douyin_video
   "
   execHql "$hqlStr"

@@ -7,6 +7,7 @@ COSN_DOUYIN_BUCKET_PATH_PREFIX='cosn://douyin-emr'
 COSN_KUAISHOU_BUCKET_PATH_PREFIX=
 
 HIVE_BIN='/usr/local/service/hive/bin/hive'
+HADOOP_BIN='/usr/local/service/hadoop/bin/hadoop'
 
 # MySQL相关数据
 MYSQL_BIN='/bin/mysql'

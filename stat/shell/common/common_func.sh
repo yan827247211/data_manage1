@@ -66,8 +66,9 @@ function exportHQL2Local() {
   _localpath=$2
   _job_dt=`date '+%Y-%m-%d'`
   _job_time=`date '+%H_%M_%S'`
+  _ab_path="/home/hadoop/yulei/shell/data/$_localpath/$_job_dt/$_job_time/"
   # for safty
-  _insert_local_hql="INSERT OVERWRITE DIRECTORY '/home/hadoop/yulei/shell/data/$_localpath/$_job_dt/$_job_time/'
+  _insert_local_hql="INSERT OVERWRITE DIRECTORY '$_ab_path'
     ROW FORMAT DELIMITED
     FIELDS TERMINATED BY '\t'
     $_hql
@@ -76,6 +77,41 @@ function exportHQL2Local() {
 
 }
 
+#导出hive命令的执行结果到MySQL
+function exportHQL2MySQL() {
+  if [ $# -ne 4 ]; then
+    log "USAGE: exportHQL2Local hiveql localpath date_dt table"
+    exit;
+  fi
+
+  _hql=$1
+  _localpath=$2
+  _date_dt=$3
+  _table=$4
+  _job_dt=`date '+%Y-%m-%d'`
+  _job_time=`date '+%H_%M_%S'`
+  _ab_path="/home/hadoop/yulei/shell/data/$_localpath/$_job_dt/$_job_time/"
+  # for safty
+  _insert_local_hql="INSERT OVERWRITE DIRECTORY '$_ab_path'
+    ROW FORMAT DELIMITED
+    FIELDS TERMINATED BY '\t'
+    $_hql
+    "
+   execHql "$_insert_local_hql"
+   # 目录不存在则创建目录
+   if [ ! -d "$_ab_path" ]; then
+       mkdir -p "$_ab_path"
+   fi
+   ${HADOOP_BIN} fs -text $_ab_path* > ${_ab_path}result.txt
+
+   echo "delete from $_table where date='$_date_dt';
+   LOAD DATA local INFILE '${_ab_path}result.txt' INTO TABLE $_table
+   FIELDS TERMINATED BY '\t';
+"
+
+   echo "$_ab_path"
+
+}
 
 
 

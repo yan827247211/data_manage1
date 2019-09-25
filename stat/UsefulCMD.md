@@ -109,7 +109,7 @@ FIELDS TERMINATED BY '\t';
 LOAD DATA local INFILE '/home/hadoop/yulei/shell/sales' INTO TABLE video_report.dy_rpt_expert_sales_volume 
 FIELDS TERMINATED BY '\t';
 
-
+hadoop fs -text /myDir/out/* | hadoop fs -put - /myDir/out.txt
 
 mysql -h10.0.0.14 -P3306 -uvideo_user -p7zhwaG6nUTJscCpH -Dvideo_report
 ```
