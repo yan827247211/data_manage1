@@ -53,10 +53,15 @@ function stat_douyin_user_info() {
   fi
   _dt=$1
   _ts=$2
+  _formated_dt=`date -d "$_dt" "+%Y-%m-%d"`
   log "dt=$_dt, ts=$_ts"
   hqlStr="
       INSERT OVERWRITE TABLE short_video.stat_douyin_user_info PARTITION(dt='$_dt')
-      SELECT a.user_id, a.sec_user_id, a.unique_id, a.nickname, a.head_img
+      SELECT a.user_id, a.sec_user_id, a.unique_id, a.nickname, a.head_img, a.gender
+      , case when a.birthday is null then -1
+         else floor(datediff(to_date('$_formated_dt'), to_date(a.birthday)) / 365.25)
+        end as age
+      , a.signature, a.province, a.city, a.custom_verify, a.weibo_verify, a.enterprise_verify_reason, a.is_shop, a.cover_img
       , a.total_favorited, a.follower_count, a.following_count, a.aweme_count, a.dongtai_count, a.favoriting_count
       , case when b.video_count is null then 0 else b.video_count end as video_count
       , case when b.video_digg_count is null then 0 else b.video_digg_count end as video_digg_count
@@ -65,7 +70,6 @@ function stat_douyin_user_info() {
       , '$_ts'
       FROM short_video.base_douyin_user a left join short_video.stat_douyin_user_video_info b on (a.user_id=b.user_id and b.dt='$_dt')
       WHERE b.dt='$_dt';
-
   "
   execHql "$hqlStr"
 }

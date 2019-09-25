@@ -22,7 +22,7 @@ SET @@SESSION.SQL_LOG_BIN = 0;
 --
 
 SET @@GLOBAL.GTID_PURGED = /*!80000 '+'*/ '184fa05c-e231-11e8-a07b-6c92bf5b8f3e:1-16391815,
-1d78b01d-aa04-11e9-b780-18ded7a37962:1-77243,
+1d78b01d-aa04-11e9-b780-18ded7a37962:1-77466,
 25b4f59a-e231-11e8-a07c-6c92bf5b8b32:1-256';
 
 --
@@ -66,26 +66,26 @@ DROP TABLE IF EXISTS `dy_rpt_audio`;
 SET character_set_client = utf8mb4;
 CREATE TABLE `dy_rpt_audio`
 (
-    `id`                        varchar(255)        NOT NULL COMMENT '音频id_日期',
-    `user_id`                   bigint(20)          NOT NULL COMMENT '抖音用户id',
-    `audio_id`                  bigint(20) unsigned NOT NULL COMMENT '音频ID',
-    `ranking`                   int(11)                            DEFAULT NULL COMMENT '音频名次',
-    `score`                     decimal(10, 2)                     DEFAULT NULL COMMENT '热度指数',
-    `audio_cover`               varchar(255)                       DEFAULT NULL COMMENT '音频封面',
-    `audio_name`                varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT '音频名称',
-    `audio_time`                bigint(20) unsigned                DEFAULT NULL COMMENT '音频时长',
-    `audio_url`                 varchar(255)                       DEFAULT NULL COMMENT '音频链接',
-    `use_number`                bigint(20) unsigned                DEFAULT NULL COMMENT '使用人数',
-    `use_number_increment`      bigint(20) unsigned                DEFAULT NULL COMMENT '使用人数增量',
-    `use_number_speed_increase` decimal(10, 2)                     DEFAULT NULL COMMENT '使用人数增速',
-    `release_time`              datetime                           DEFAULT NULL COMMENT '发布时间',
-    `unique_id`                 varchar(255)                       DEFAULT NULL COMMENT '抖音号',
-    `head_portrait`             varchar(255)                       DEFAULT NULL COMMENT '头像',
-    `nickname`                  varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT '昵称',
-    `audio_type`                varchar(255)                       DEFAULT NULL COMMENT '音频类型',
-    `create_time`               datetime                           DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '数据创建时间',
-    `update_time`               datetime                           DEFAULT CURRENT_TIMESTAMP COMMENT '数据修改日期',
-    `status`                    int(255) unsigned   NOT NULL       DEFAULT '0' COMMENT '数据状态',
+    `id`                        varchar(255)                       NOT NULL COMMENT '音频id_日期',
+    `user_id`                   bigint(20)                         NOT NULL COMMENT '抖音用户id',
+    `audio_id`                  bigint(20) unsigned                NOT NULL COMMENT '音频ID',
+    `ranking`                   int(11)                            NOT NULL COMMENT '音频名次',
+    `score`                     decimal(10, 2)                     NOT NULL COMMENT '热度指数',
+    `audio_cover`               varchar(255)                       NOT NULL COMMENT '音频封面',
+    `audio_name`                varchar(255) CHARACTER SET utf8mb4 NOT NULL COMMENT '音频名称',
+    `audio_time`                bigint(20) unsigned                NOT NULL COMMENT '音频时长',
+    `audio_url`                 varchar(255)                       NOT NULL COMMENT '音频链接',
+    `use_number`                bigint(20) unsigned                NOT NULL COMMENT '使用人数',
+    `use_number_increment`      bigint(20) unsigned                NOT NULL COMMENT '使用人数增量',
+    `use_number_speed_increase` decimal(10, 2)                     NOT NULL COMMENT '使用人数增速',
+    `release_time`              datetime                           NOT NULL COMMENT '发布时间',
+    `unique_id`                 varchar(255)                       NOT NULL COMMENT '抖音号',
+    `head_portrait`             varchar(255)                       NOT NULL COMMENT '头像',
+    `nickname`                  varchar(255) CHARACTER SET utf8mb4 NOT NULL COMMENT '昵称',
+    `audio_type`                varchar(255)                       NOT NULL COMMENT '音频类型',
+    `create_time`               datetime                           NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '数据创建时间',
+    `update_time`               datetime                           NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '数据修改日期',
+    `status`                    int(255) unsigned                  NOT NULL DEFAULT '0' COMMENT '数据状态',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8 COMMENT ='抖音音频榜';
@@ -353,8 +353,8 @@ CREATE TABLE `dy_rpt_expert_sales_volume`
     `continuous_list`          int(11) unsigned                   NOT NULL COMMENT '累计上榜天数',
     `date_type`                int(11) unsigned                   NOT NULL COMMENT '日期类型（0：当天数据统计，1：七天数据统计，2，三十天数据统计）',
     `date`                     varchar(255)                       NOT NULL COMMENT '数据日期',
-    `create_time`              datetime                           NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '数据创建时间',
-    `update_time`              datetime                                    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '数据修改时间',
+    `create_time`              datetime                           NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '数据创建时间',
+    `update_time`              datetime                           NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '数据修改时间',
     `status`                   int(11) unsigned                   NOT NULL COMMENT '数据状态',
     PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB
@@ -391,8 +391,8 @@ CREATE TABLE `dy_rpt_good_commodity`
     `date_type`                int(11) unsigned                   NOT NULL COMMENT '日期类型（0：当天数据统计，1：七天数据统计，2，三十天数据统计）',
     `date`                     varchar(255)                       NOT NULL COMMENT '数据日期',
     `create_time`              datetime                           NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '数据创建时间',
-    `update_time`              datetime                                    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '数据修改时间',
-    `status`                   int(11) unsigned                   NOT NULL COMMENT '数据状态',
+    `update_time`              datetime                           NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '数据修改时间',
+    `status`                   int(11) unsigned                   NOT NULL DEFAULT '0' COMMENT '数据状态',
     PRIMARY KEY (`good_commodity_id`) USING BTREE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8 COMMENT ='好物榜';
@@ -1093,4 +1093,4 @@ SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40101 SET COLLATION_CONNECTION = @OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES = @OLD_SQL_NOTES */;
 
--- Dump completed on 2019-09-24 18:55:31
+-- Dump completed on 2019-09-25 22:25:45
