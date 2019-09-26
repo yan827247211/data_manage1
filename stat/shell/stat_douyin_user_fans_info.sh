@@ -35,31 +35,82 @@ function stat_douyin_user_fans_details() {
   _ts=$2
   log "dt=$_dt, ts=$_ts"
   hqlStr="
-      INSERT OVERWRITE TABLE short_video.stat_douyin_user_fans_detail PARTITION(dt='$_dt', prop_type='gender')
-      select user_id, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY cnt desc) AS rank, gender, cnt, '$_ts'
-      from(
-          SELECT a.user_id, coalesce(gender,'-1') as gender, count(1) as cnt
-          FROM short_video.relat_douyin_user_fans a LEFT JOIN short_video.base_douyin_user b ON (a.fans_user_id=b.user_id)
-          GROUP BY a.user_id, coalesce(gender,'-1')
-      ) c;
+  --性别
+INSERT OVERWRITE TABLE short_video.stat_douyin_user_fans_detail PARTITION(dt='$_dt', prop_type='gender')
+select user_id, gender, ranking, cnt as gender_cnt, concat(round(100*cnt/sum(cnt) over (partition by user_id),2),'%') as perct,'$_ts'
+from (
+  select user_id, gender, cnt, row_number() over (partition by user_id order by cnt desc) as ranking
+  from (
+    SELECT a.user_id, b.gender, count(1) as cnt
+    FROM short_video.relat_douyin_user_fans a LEFT JOIN short_video.stat_douyin_user_info b ON (a.fans_user_id=b.user_id and b.dt='$_dt' and a.dt='$_dt')
+    where gender in (1,2)
+    GROUP BY a.user_id, b.gender
+  ) as b
+) c;
+-- 城市
+INSERT OVERWRITE TABLE short_video.stat_douyin_user_fans_detail PARTITION(dt='$_dt', prop_type='city')
+select user_id, city, rank, cnt, concat(round(100*cnt/sum(cnt) over (partition by user_id),2),'%') as perct,'$_ts'
+from (
+  select user_id, case when rank<=19 then city else '其他城市' end as city
+  , case when rank<=19 then rank else 20 end as rank
+  , sum(cnt) as cnt from (
+    select user_id, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY cnt DESC) AS rank, city, cnt
+    from(
+        SELECT a.user_id, b.city, count(1) as cnt
+        FROM short_video.relat_douyin_user_fans a LEFT JOIN short_video.stat_douyin_user_info b ON (a.fans_user_id=b.user_id and b.dt='$_dt' and a.dt='$_dt')
+        where b.city is not null
+        GROUP BY a.user_id, b.city
+    ) c
+  ) d
+  group by user_id, case when rank<=19 then city else '其他城市' end
+  , case when rank<=19 then rank else 20 end
+) e;
+--省份
+INSERT OVERWRITE TABLE short_video.stat_douyin_user_fans_detail PARTITION(dt='$_dt', prop_type='province')
+select user_id, province, rank, cnt, concat(round(100*cnt/sum(cnt) over (partition by user_id),2),'%') as perct,'$_ts'
+from (
+  select user_id, case when rank<=19 then province else '其他省份' end as province
+  , case when rank<=19 then rank else 20 end as rank
+  , sum(cnt) as cnt from (
+    select user_id, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY cnt DESC) AS rank, province, cnt
+    from(
+        SELECT a.user_id, b.province, count(1) as cnt
+        FROM short_video.relat_douyin_user_fans a LEFT JOIN short_video.stat_douyin_user_info b ON (a.fans_user_id=b.user_id and b.dt='$_dt' and a.dt='$_dt')
+        where b.province is not null
+        GROUP BY a.user_id, b.province
+    ) c
+  ) d
+  group by user_id, case when rank<=19 then province else '其他省份' end
+  , case when rank<=19 then rank else 20 end
+) e;
 
-      INSERT OVERWRITE TABLE short_video.stat_douyin_user_fans_detail PARTITION(dt='$_dt', prop_type='city')
-      select user_id, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY cnt DESC) AS rank, city, cnt, '$_ts'
-      from(
-          SELECT a.user_id, coalesce(city,'-1') as city, count(1) as cnt
-          FROM short_video.relat_douyin_user_fans a LEFT JOIN short_video.base_douyin_user b ON (a.fans_user_id=b.user_id)
-          GROUP BY a.user_id, coalesce(city,'-1')
-      ) c;
-
-      INSERT OVERWRITE TABLE short_video.stat_douyin_user_fans_detail PARTITION(dt='$_dt', prop_type='age')
-      SELECT user_id, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY cnt DESC) AS rank, age, cnt, '$_ts'
-      from(
+--年龄
+INSERT OVERWRITE TABLE short_video.stat_douyin_user_fans_detail PARTITION(dt='$_dt', prop_type='age')
+select user_id, age_seg, rank, cnt, concat(round(100*cnt/sum(cnt) over (partition by user_id),2),'%') as perct,'$_ts'
+from (
+    select user_id, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY cnt DESC) AS rank, age_seg, cnt
+    from(
         SELECT a.user_id
-        , CASE WHEN birthday is null THEN -1 ELSE floor(DATEDIFF(TO_DATE(FROM_UNIXTIME(UNIX_TIMESTAMP())), TO_DATE(birthday)) / 365.25) END AS age
-        , count(1) AS cnt
-        FROM short_video.relat_douyin_user_fans a LEFT JOIN short_video.base_douyin_user b ON (a.fans_user_id=b.user_id)
-        GROUP BY a.user_id, CASE WHEN birthday IS NULL then -1 ELSE FLOOR(DATEDIFF(TO_DATE(FROM_UNIXTIME(UNIX_TIMESTAMP())), TO_DATE(birthday)) / 365.25) END
-      ) c;
+        , case when b.age between 0 and 5 then '0'
+                when b.age between 6 and 17 then '1'
+                when b.age between 18 and 24 then '2'
+                when b.age between 25 and 30 then '3'
+                when b.age between 31 and 35 then '4'
+                when b.age between 36 and 40 then '5'
+                when b.age>= 41 then '6' else '-1' end as age_seg
+        , count(1) as cnt
+        FROM short_video.relat_douyin_user_fans a LEFT JOIN short_video.stat_douyin_user_info b ON (a.fans_user_id=b.user_id and b.dt='$_dt' and a.dt='$_dt')
+        where b.age is not null
+        and b.age>5
+        GROUP BY a.user_id, case when b.age between 0 and 5 then '0'
+                when b.age between 6 and 17 then '1'
+                when b.age between 18 and 24 then '2'
+                when b.age between 25 and 30 then '3'
+                when b.age between 31 and 35 then '4'
+                when b.age between 36 and 40 then '5'
+                when b.age>= 41 then '6' else '-1' end
+    ) c
+) e;
   "
   execHql "$hqlStr"
 }
@@ -77,60 +128,74 @@ function stat_douyin_user_fans_info() {
   log "dt=$_dt, ts=$_ts"
   hqlStr="
       INSERT OVERWRITE TABLE short_video.stat_douyin_user_fans_info PARTITION(dt='$_dt')
-      -- 主要年龄Top1
-      select a.user_id, a.age_seg, null as province,  b.city, coalesce(c.female_rate_seg,0), '$_ts' from (
-          select user_id, age_seg from (
-            select user_id, age_seg, age_cnt, row_number() over (partition by user_id order by age_cnt desc) as rn
-            from (
-              select user_id,
-              case when cast(prop_key as int) between 0 and 5 then '0'
-                when cast(prop_key as int) between 6 and 17 then '1'
-                when cast(prop_key as int) between 18 and 24 then '2'
-                when cast(prop_key as int) between 25 and 30 then '3'
-                when cast(prop_key as int) between 31 and 35 then '4'
-                when cast(prop_key as int) between 36 and 41 then '5'
-                when cast(prop_key as int)>41 then '6' else '-1' end as age_seg,
-              sum(prop_count) as age_cnt
-              from short_video.stat_douyin_user_fans_detail
-              where dt='$_dt' and prop_type='age'
-              group by user_id,
-              case when cast(prop_key as int) between 0 and 5 then '0'
-                when cast(prop_key as int) between 6 and 17 then '1'
-                when cast(prop_key as int) between 18 and 24 then '2'
-                when cast(prop_key as int) between 25 and 30 then '3'
-                when cast(prop_key as int) between 31 and 35 then '4'
-                when cast(prop_key as int) between 36 and 41 then '5'
-                when cast(prop_key as int)>41 then '6' else '-1' end
-            ) a1) a2
-            where rn=1
-          ) a
-      left join (
-      -- 粉丝主要城市Top1
-          select user_id, prop_key as city
+      select user.user_id
+      , age.age
+      , province.province
+      , city.city
+      , female_rate.female_rate
+      , main_age.main_age
+      , main_province.main_province
+      , main_city.main_city
+      ,'$_ts'
+      from (select user_id
+       from stat_douyin_user_fans_detail
+       where dt='$_dt' group by user_id) user
+        left join (
+          -- 省份
+          select user_id, concat_ws(',',collect_list(concat_ws(':', prop_key, prop_percent))) as province
           from short_video.stat_douyin_user_fans_detail
-          where dt='$_dt' and prop_type='city' and prop_rank=1
-      ) b on (a.user_id=b.user_id)
-      left join (
-          select user_id
-          , case when female_rate<10 then 0
-            when female_rate>=10 and female_rate<20 then 1
-            when female_rate>=20 and female_rate<30 then 2
-            when female_rate>=30 and female_rate<40 then 3
-            when female_rate>=40 and female_rate<50 then 4
-            when female_rate>=50 and female_rate<60 then 5
-            when female_rate>=60 and female_rate<70 then 6
-            when female_rate>=70 and female_rate<80 then 7
-            when female_rate>=80 and female_rate<90 then 8
-            when female_rate>=90 then 9 end as female_rate_seg from (
-              select user_id, cast(female*100/total as decimal(10,2)) as female_rate
-                from (
-                    select user_id, sum(case when prop_key='2' then prop_count else 0 end) as female, sum(prop_count) as total
-                    from short_video.stat_douyin_user_fans_detail
-                    where dt='$_dt' and prop_type='gender'
-                    group by user_id
-                ) c1
-              )c2
-      ) c on (a.user_id=c.user_id)
+          where dt='$_dt'
+          and prop_type='province'
+          group by user_id
+        ) province on (user.user_id=province.user_id)
+        left join (
+          -- 城市
+          select user_id, concat_ws(',',collect_list(concat_ws(':', prop_key, prop_percent))) as city
+          from short_video.stat_douyin_user_fans_detail
+          where dt='$_dt'
+          and prop_type='city'
+          group by userid
+        ) city on (user.user_id=city.user_id)
+        left join (
+          -- 年龄
+          select user_id, concat_ws(',',collect_list(concat_ws(':', prop_key, prop_percent))) as age
+          from short_video.stat_douyin_user_fans_detail
+          where dt='$_dt'
+          and prop_type='age'
+          group by user_id
+        ) age on (user.user_id=age.user_id)
+        left join (
+          -- 女性
+          select user_id, cast(regexp_replace(prop_percent,'%','') as decimal(10,2)) as female_rate
+          from short_video.stat_douyin_user_fans_detail
+          where dt='$_dt'
+          and prop_type='gender'
+          and prop_key='2'
+        ) female_rate on (user.user_id=female_rate.user_id)
+        left join (
+        --主要年龄
+          select user_id, prop_key as main_age
+          from short_video.stat_douyin_user_fans_detail
+          where dt='$_dt'
+          and prop_type = 'age'
+          and prop_rank=1
+        ) main_age on (user.user_id=main_age.user_id)
+        left join (
+        --主要省份
+          select user_id, prop_key as main_province
+          from short_video.stat_douyin_user_fans_detail
+          where dt='$_dt'
+          and prop_type = 'province'
+          and prop_rank=1
+        ) main_province on (user.user_id=main_province.user_id)
+        left join (
+        --主要城市
+          select user_id, prop_key as main_city
+          from short_video.stat_douyin_user_fans_detail
+          where dt='$_dt'
+          and prop_type = 'city'
+          and prop_rank=1
+        ) main_city on (user.user_id=main_city.user_id)
   "
   execHql "$hqlStr"
 }

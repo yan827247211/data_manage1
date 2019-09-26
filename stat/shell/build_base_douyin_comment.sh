@@ -93,35 +93,21 @@ function calc_base_douyin_comment_daily() {
 function build_video_fans_relation_from_comment() {
     if [ $# -ne 1 ]; then
         log "wrong parameters:$@"
-        log 'usage:   build_video_fans_relation_from_comment ts'
-        log 'example: build_video_fans_relation_from_comment 1568165988'
+        log 'usage:   build_video_fans_relation_from_comment dt ts'
+        log 'example: build_video_fans_relation_from_comment 20190920 1568165988'
         exit 1
     fi
-    _ts=$1
+
+    _dt=$1
+    _ts=$2
+
 
     hqlStr="
-        INSERT OVERWRITE TABLE short_video.relat_douyin_video_fans
-        SELECT aweme_id, user_id, "$_ts" FROM short_video.base_douyin_comment GROUP BY aweme_id, user_id
-    "
-    execHql "$hqlStr"
-}
-
-# 从评论数据中抽取视频粉丝信息
-function build_user_fans_relation_from_comment() {
-    if [ $# -ne 1 ]; then
-        log "wrong parameters:$@"
-        log 'usage:   build_user_fans_relation_from_comment ts'
-        log 'example: build_user_fans_relation_from_comment 1568165988'
-        exit 1
-    fi
-    _ts=$1
-
-    hqlStr="
-        INSERT OVERWRITE TABLE short_video.relat_douyin_user_fans
-        SELECT a.user_id as author_user_id, b.user_id as fans_user_id, "$_ts"
-        FROM short_video.base_douyin_video a JOIN short_video.base_douyin_comment b ON (a.aweme_id=b.aweme_id)
-        WHERE a.user_id!=b.user_id
-        GROUP BY a.user_id, b.user_id
+        INSERT OVERWRITE TABLE short_video.relat_douyin_video_fans PARTITION(dt='$_dt')
+        SELECT aweme_id, user_id, "$_ts"
+        FROM short_video.log_douyin_comment
+        where dt<='$_dt'
+        GROUP BY aweme_id, user_id, "$_ts"
     "
     execHql "$hqlStr"
 }
@@ -141,7 +127,7 @@ calc_base_douyin_comment_daily ${_dt} ${_ts}
 check "calc_base_douyin_comment_daily ${_dt} ${_ts}"
 calc_base_douyin_comment_info ${_dt} ${_ts}
 check "calc_base_douyin_comment_info ${_dt} ${_ts}"
-build_video_fans_relation_from_comment ${_ts}
-check "build_video_fans_relation_from_comment ${_ts}"
+build_video_fans_relation_from_comment ${_dt} ${_ts}
+check "build_video_fans_relation_from_comment ${_dt} ${_ts}"
 
 log "daily stat douyin comment job done..."

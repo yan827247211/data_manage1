@@ -42,7 +42,7 @@ from (
   select aweme_id, gender, cnt, row_number() over (partition by aweme_id order by cnt desc) as ranking
   from (
     SELECT a.aweme_id, b.gender, count(1) as cnt
-    FROM short_video.relat_douyin_video_fans a LEFT JOIN short_video.stat_douyin_user_info b ON (a.fans_user_id=b.user_id and b.dt='$_dt')
+    FROM short_video.relat_douyin_video_fans a LEFT JOIN short_video.stat_douyin_user_info b ON (a.fans_user_id=b.user_id and b.dt='$_dt' and a.dt='$_dt')
     where gender in (1,2)
     GROUP BY a.aweme_id, b.gender
   ) as b
@@ -58,7 +58,7 @@ from (
     select aweme_id, ROW_NUMBER() OVER (PARTITION BY aweme_id ORDER BY cnt DESC) AS rank, city, cnt
     from(
         SELECT a.aweme_id, b.city, count(1) as cnt
-        FROM short_video.relat_douyin_video_fans a LEFT JOIN short_video.stat_douyin_user_info b ON (a.fans_user_id=b.user_id and b.dt='$_dt')
+        FROM short_video.relat_douyin_video_fans a LEFT JOIN short_video.stat_douyin_user_info b ON (a.fans_user_id=b.user_id and b.dt='$_dt' and a.dt='$_dt')
         where b.city is not null
         GROUP BY a.aweme_id, b.city
     ) c
@@ -77,7 +77,7 @@ from (
     select aweme_id, ROW_NUMBER() OVER (PARTITION BY aweme_id ORDER BY cnt DESC) AS rank, province, cnt
     from(
         SELECT a.aweme_id, b.province, count(1) as cnt
-        FROM short_video.relat_douyin_video_fans a LEFT JOIN short_video.stat_douyin_user_info b ON (a.fans_user_id=b.user_id and b.dt='$_dt')
+        FROM short_video.relat_douyin_video_fans a LEFT JOIN short_video.stat_douyin_user_info b ON (a.fans_user_id=b.user_id and b.dt='$_dt' and a.dt='$_dt')
         where b.province is not null
         GROUP BY a.aweme_id, b.province
     ) c
@@ -101,7 +101,7 @@ from (
                 when b.age between 36 and 40 then '5'
                 when b.age>= 41 then '6' else '-1' end as age_seg
         , count(1) as cnt
-        FROM short_video.relat_douyin_video_fans a LEFT JOIN short_video.stat_douyin_user_info b ON (a.fans_user_id=b.user_id and b.dt='$_dt')
+        FROM short_video.relat_douyin_video_fans a LEFT JOIN short_video.stat_douyin_user_info b ON (a.fans_user_id=b.user_id and b.dt='$_dt' and a.dt='$_dt')
         where b.age is not null
         and b.age>5
         GROUP BY a.aweme_id, case when b.age between 0 and 5 then '0'
@@ -242,8 +242,8 @@ _dt=$1
 #批次号，10位时间戳
 _ts=$(date +%s)
 
-#stat_douyin_video_fans_detail ${_dt} ${_ts}
-#check "stat_douyin_video_fans_detail  ${_dt} ${_ts}"
+stat_douyin_video_fans_detail ${_dt} ${_ts}
+check "stat_douyin_video_fans_detail  ${_dt} ${_ts}"
 stat_douyin_user_fans_info  ${_dt} ${_ts}
 check "stat_douyin_user_fans_info  ${_dt} ${_ts}"
 

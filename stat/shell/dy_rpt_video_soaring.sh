@@ -38,7 +38,7 @@ function stat_dy_rpt_video_soaring() {
   log "_anchordt=$_anchordt, _comparedt=$_comparedt, ts=$_ts, _formated_anchordt=$_formated_anchordt"
   hqlStr="
       select concat_ws('_', video_id,'$_anchordt', '0') as id
-        ,s.user_id, video_id, share_url, ranking, score, u.follower_count fans_number
+        ,s.user_id, video_id, share_url, ranking, score
         ,like_number, like_number-lastday_like_number as like_increment, coalesce((like_number-lastday_like_number)/lastday_like_number,0) as like_speed_increase
         ,comment_number, comment_number-lastday_comment_number as comment_increment, coalesce((comment_number-lastday_comment_number)/lastday_comment_number) as comment_speed_increase
         , video_cover, video_title, null as video_label, fans_stat.hotwords as video_hot_word
@@ -89,7 +89,7 @@ function stat_dy_rpt_video_soaring() {
         left join short_video.stat_douyin_video_fans_info fans_stat on (s.video_id=fans_stat.aweme_id and fans_stat.dt='$_anchordt' and s.ranking<=3000)
         where ranking<=3000
   "
-  exportHQL2Local "$hqlStr" "stat_dy_rpt_video_soaring"
+  exportHQL2MySQL "$hqlStr" "stat_dy_rpt_video_soaring" "$_anchordt" "video_report.dy_rpt_video_soaring"
 #    echo "$hqlStr"
 }
 
