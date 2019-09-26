@@ -680,6 +680,22 @@ CREATE TABLE `stat_douyin_user_fans_detail`
         )
     STORED AS ORC;
 
+--视频粉丝统计信息表
+CREATE TABLE `stat_douyin_video_fans_detail`
+(
+    `aweme_id`     string COMMENT '视频ID',
+    `prop_key`     string COMMENT '属性key',
+    `prop_rank`    int COMMENT '属性分布排名',
+    `prop_count`   bigint COMMENT '属性key数量',
+    `prop_percent` string COMMENT '属性key数量占比',
+    `stat_time`    bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+) COMMENT '抖音-用户粉丝属性明细'
+    PARTITIONED BY (
+        `dt` string,
+        `prop_type` string COMMENT '属性类型，age:年龄，gender:性别 city:城市，province:省份，hotword:热词'
+        )
+    STORED AS ORC;
+
 --视频信息统计表
 CREATE TABLE `stat_douyin_video_info`
 (
@@ -722,12 +738,16 @@ CREATE TABLE `stat_douyin_video_hotwords`
 --视频观众统计信息表
 CREATE TABLE `stat_douyin_video_fans_info`
 (
-    `aweme_id`        string COMMENT '用户ID',
-    `fans_age_seg`    int COMMENT '粉丝主要年龄区间，1：6-17、2：18-24、3：25-30、4：31-35、5：36-40、6：41+',
-    `fans_province`   string COMMENT '粉丝主要省份信息',
-    `fans_city`       string COMMENT '粉丝主要城市信息',
-    `female_rate_seg` int COMMENT '女粉丝占比区间,0：10%以下、1：10%-20%、2：20%-30%、3：30%-40%，4：40%-50%，5：50%-60%，6：60%-70%，7：70%-80%，8：80%-90%，9：90%以上',
-    `stat_time`       bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+    `aweme_id`      string COMMENT '视频ID',
+    `hotwords`      string COMMENT '视频热词占比( 热词:比例,热词:比例 )',
+    `fans_age`      string COMMENT '各年龄段所占比例(不同年龄段所占比例由 , 分隔开 各年龄段（6-17、18-24、25-30、31-35、36-40、41+）',
+    `fans_province` string COMMENT '省份占比( 省份:比例,省份:比例 )',
+    `fans_city`     string COMMENT '城市占比( 城市:比例,城市:比例 )',
+    `female_rate`   int COMMENT '女性观众所占比例',
+    `main_age`      string COMMENT '主要年龄',
+    `main_province` string COMMENT '主要省份',
+    `main_city`     string COMMENT '主要城市',
+    `stat_time`     bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
 ) COMMENT '抖音-视频观众统计信息'
     PARTITIONED BY (
         `dt` string
@@ -779,7 +799,7 @@ CREATE TABLE `biz_user_industry`
 (
     `id`          string COMMENT '关系id',
     `user_id`     string COMMENT '用户ID',
-    `industry_id`    string COMMENT '标签ID',
+    `industry_id` string COMMENT '标签ID',
     `status`      int COMMENT '数据状态',
     `create_time` string COMMENT '数据创建时间',
     `update_time` string COMMENT '数据更新时间'
@@ -791,8 +811,8 @@ CREATE TABLE `biz_user_industry`
 
 CREATE TABLE `dim_user_industry`
 (
-    `user_id`     string COMMENT '用户ID',
-    `industry`    string COMMENT '标签ID'
+    `user_id`  string COMMENT '用户ID',
+    `industry` string COMMENT '标签ID'
 ) COMMENT '用户行业维度表'
     ROW FORMAT DELIMITED
         FIELDS TERMINATED BY '\t'
@@ -801,8 +821,8 @@ CREATE TABLE `dim_user_industry`
 
 CREATE TABLE `dim_user_label`
 (
-    `user_id`     string COMMENT '用户ID',
-    `label`    string COMMENT '标签ID'
+    `user_id` string COMMENT '用户ID',
+    `label`   string COMMENT '标签ID'
 ) COMMENT '用户标签维度表'
     ROW FORMAT DELIMITED
         FIELDS TERMINATED BY '\t'

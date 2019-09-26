@@ -143,7 +143,5 @@ calc_base_douyin_comment_info ${_dt} ${_ts}
 check "calc_base_douyin_comment_info ${_dt} ${_ts}"
 build_video_fans_relation_from_comment ${_ts}
 check "build_video_fans_relation_from_comment ${_ts}"
-build_user_fans_relation_from_comment ${_ts}
-check "build_user_fans_relation_from_comment ${_ts}"
 
 log "daily stat douyin comment job done..."
