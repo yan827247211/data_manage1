@@ -128,7 +128,7 @@ function stat_douyin_user_fans_info() {
   log "dt=$_dt, ts=$_ts"
   hqlStr="
       INSERT OVERWRITE TABLE short_video.stat_douyin_user_fans_info PARTITION(dt='$_dt')
-      select user.user_id
+      select u.user_id
       , age.age
       , province.province
       , city.city
@@ -139,7 +139,7 @@ function stat_douyin_user_fans_info() {
       ,'$_ts'
       from (select user_id
        from stat_douyin_user_fans_detail
-       where dt='$_dt' group by user_id) user
+       where dt='$_dt' group by user_id) u
         left join (
           -- 省份
           select user_id, concat_ws(',',collect_list(concat_ws(':', prop_key, prop_percent))) as province
@@ -147,15 +147,15 @@ function stat_douyin_user_fans_info() {
           where dt='$_dt'
           and prop_type='province'
           group by user_id
-        ) province on (user.user_id=province.user_id)
+        ) province on (u.user_id=province.user_id)
         left join (
           -- 城市
           select user_id, concat_ws(',',collect_list(concat_ws(':', prop_key, prop_percent))) as city
           from short_video.stat_douyin_user_fans_detail
           where dt='$_dt'
           and prop_type='city'
-          group by userid
-        ) city on (user.user_id=city.user_id)
+          group by user_id
+        ) city on (u.user_id=city.user_id)
         left join (
           -- 年龄
           select user_id, concat_ws(',',collect_list(concat_ws(':', prop_key, prop_percent))) as age
@@ -163,7 +163,7 @@ function stat_douyin_user_fans_info() {
           where dt='$_dt'
           and prop_type='age'
           group by user_id
-        ) age on (user.user_id=age.user_id)
+        ) age on (u.user_id=age.user_id)
         left join (
           -- 女性
           select user_id, cast(regexp_replace(prop_percent,'%','') as decimal(10,2)) as female_rate
@@ -171,7 +171,7 @@ function stat_douyin_user_fans_info() {
           where dt='$_dt'
           and prop_type='gender'
           and prop_key='2'
-        ) female_rate on (user.user_id=female_rate.user_id)
+        ) female_rate on (u.user_id=female_rate.user_id)
         left join (
         --主要年龄
           select user_id, prop_key as main_age
@@ -179,7 +179,7 @@ function stat_douyin_user_fans_info() {
           where dt='$_dt'
           and prop_type = 'age'
           and prop_rank=1
-        ) main_age on (user.user_id=main_age.user_id)
+        ) main_age on (u.user_id=main_age.user_id)
         left join (
         --主要省份
           select user_id, prop_key as main_province
@@ -187,7 +187,7 @@ function stat_douyin_user_fans_info() {
           where dt='$_dt'
           and prop_type = 'province'
           and prop_rank=1
-        ) main_province on (user.user_id=main_province.user_id)
+        ) main_province on (u.user_id=main_province.user_id)
         left join (
         --主要城市
           select user_id, prop_key as main_city
@@ -195,7 +195,7 @@ function stat_douyin_user_fans_info() {
           where dt='$_dt'
           and prop_type = 'city'
           and prop_rank=1
-        ) main_city on (user.user_id=main_city.user_id)
+        ) main_city on (u.user_id=main_city.user_id)
   "
   execHql "$hqlStr"
 }
