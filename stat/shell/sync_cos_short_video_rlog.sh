@@ -64,6 +64,9 @@ function add_douyin_partition() {
       goods)
         _table='short_video.rlog_douyin_goods'
         ;;
+      haowu)
+        _table='short_video.rlog_douyin_haowu'
+        ;;
       music)
         _table='music'
         ;;

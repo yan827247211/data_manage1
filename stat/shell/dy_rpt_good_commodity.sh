@@ -80,8 +80,8 @@ function stat_dy_rpt_good_commodity_day() {
            when sales>=500000 then 7
           end as sales_volume_interval,
           b.onlist_cnt as continuous_list
-        from short_video.base_douyin_haowu_daily a left join short_video.base_douyin_haowu_goods_onlist_count b on (a.product_id=b.product_id)
-        where dt='$_anchordt') stat left join short_video.stat_douyin_user_info us on (stat.user_id=us.user_id and us.dt='$_anchordt')
+        from short_video.base_douyin_haowu_daily a left join short_video.stat_douyin_haowu_goods_onlist_count b on (a.product_id=b.product_id and a.dt='$_anchordt' and b.dt='$_anchordt')
+        where a.dt='$_anchordt' and b.dt='$_anchordt') stat left join short_video.stat_douyin_user_info us on (stat.user_id=us.user_id and us.dt='$_anchordt')
   "
   exportHQL2Local "$hqlStr" "stat_dy_rpt_good_commodity_day"
 #    echo "$hqlStr"

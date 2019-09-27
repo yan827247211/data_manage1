@@ -44,11 +44,13 @@ function stat_douyin_take_goods() {
           SELECT stat_percent.user_id, stat_percent.product_id, stat_percent.digg/sum(stat_percent.digg) over (partition  by stat_percent.product_id) as perc
           FROM (
             select user_id, product_id, sum(digg_count) as digg
-            FROM short_video.base_douyin_video
-            WHERE product_id is not null
+            FROM short_video.stat_douyin_video_info
+            WHERE dt='$_dt'
+            and product_id is not null
             GROUP BY user_id, product_id
           ) stat_percent
-        ) a JOIN short_video.base_douyin_goods goods ON (a.product_id=goods.product_id)
+        ) a JOIN short_video.stat_douyin_goods goods ON (a.product_id=goods.product_id and goods.dt='$_dt')
+        where goods.dt='$_dt'
   "
   execHql "$hqlStr"
 }

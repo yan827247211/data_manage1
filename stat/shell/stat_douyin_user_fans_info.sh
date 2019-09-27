@@ -200,6 +200,30 @@ function stat_douyin_user_fans_info() {
   execHql "$hqlStr"
 }
 
+# 从评论数据中抽取计算用户-粉丝关系
+function build_user_fans_relation() {
+    if [ $# -ne 2 ]; then
+        log "wrong parameters:$@"
+        log 'usage:   build_user_fans_relation dt ts'
+        log 'example: build_user_fans_relation 20190920 1568165988'
+        exit 1
+    fi
+
+    _dt=$1
+    _ts=$2
+
+
+    hqlStr="
+        INSERT OVERWRITE TABLE short_video.relat_douyin_user_fans PARTITION(dt='$_dt')
+        select user_id, be_followered_uid,'$_ts'
+        from short_video.log_douyin_user
+        where dt<='$_dt'
+        and be_followered_uid is not null
+        group by user_id, be_followered_uid,'$_ts'
+    "
+    execHql "$hqlStr"
+}
+
 function export_user_fans_info() {
   if [ $# -ne 1 ]; then
     log "wrong parameters:$@"
@@ -222,7 +246,7 @@ function export_user_fans_info() {
         from short_video.stat_douyin_user_fans_info a left join short_video.stat_douyin_user_info b on (a.user_id=b.user_id and a.dt='$_dt' and b.dt='$_dt')
         where a.dt='$_dt' and b.dt='$_dt'
   "
-  exportHQL2MySQL "$hqlStr" "dy_rpt_expert_proportion" "$_dt" "dy_rpt_expert_proportion"
+  exportHQL2MySQLReplace "$hqlStr" "dy_rpt_expert_proportion" "$_dt" "dy_rpt_expert_proportion"
 }
 
 # 检查参数
@@ -236,10 +260,13 @@ _dt=$1
 #批次号，10位时间戳
 _ts=$(date +%s)
 
-#stat_douyin_user_fans_details ${_dt} ${_ts}
-#check "stat_douyin_user_fans_details  ${_dt} ${_ts}"
-#stat_douyin_user_fans_info  ${_dt} ${_ts}
-#check "stat_douyin_user_fans_info  ${_dt} ${_ts}"
+
+build_user_fans_relation ${_dt} ${_ts}
+check "build_user_fans_relation  ${_dt} ${_ts}"
+stat_douyin_user_fans_details ${_dt} ${_ts}
+check "stat_douyin_user_fans_details  ${_dt} ${_ts}"
+stat_douyin_user_fans_info  ${_dt} ${_ts}
+check "stat_douyin_user_fans_info  ${_dt} ${_ts}"
 export_user_fans_info ${_dt}
 check "export_user_fans_info  ${_dt}"
 log "daily stat douyin user stat job done..."

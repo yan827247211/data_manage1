@@ -225,6 +225,9 @@ for _logType in "${_TARGET_CLEAN_LOG_TYPES[@]}"; do
       goods)
         clean_douyin_goods_log $_dt $_hour
         ;;
+      haowu)
+        log "no need clean haowu, just build."
+        ;;
       music)
         log "music clean script is under develop."
         ;;

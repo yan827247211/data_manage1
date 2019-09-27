@@ -89,28 +89,7 @@ function calc_base_douyin_comment_daily() {
   execHql "$hqlStr"
 }
 
-# 从评论数据中抽取计算视频-粉丝关系
-function build_video_fans_relation_from_comment() {
-    if [ $# -ne 1 ]; then
-        log "wrong parameters:$@"
-        log 'usage:   build_video_fans_relation_from_comment dt ts'
-        log 'example: build_video_fans_relation_from_comment 20190920 1568165988'
-        exit 1
-    fi
 
-    _dt=$1
-    _ts=$2
-
-
-    hqlStr="
-        INSERT OVERWRITE TABLE short_video.relat_douyin_video_fans PARTITION(dt='$_dt')
-        SELECT aweme_id, user_id, "$_ts"
-        FROM short_video.log_douyin_comment
-        where dt<='$_dt'
-        GROUP BY aweme_id, user_id, "$_ts"
-    "
-    execHql "$hqlStr"
-}
 
 # 检查参数
 if [ $# -ne 1 ]; then
@@ -127,7 +106,4 @@ calc_base_douyin_comment_daily ${_dt} ${_ts}
 check "calc_base_douyin_comment_daily ${_dt} ${_ts}"
 calc_base_douyin_comment_info ${_dt} ${_ts}
 check "calc_base_douyin_comment_info ${_dt} ${_ts}"
-build_video_fans_relation_from_comment ${_dt} ${_ts}
-check "build_video_fans_relation_from_comment ${_dt} ${_ts}"
-
 log "daily stat douyin comment job done..."

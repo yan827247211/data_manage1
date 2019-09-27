@@ -60,6 +60,9 @@ function add_douyin_partition_day() {
       goods)
         _table='short_video.rlog_douyin_goods'
         ;;
+      haowu)
+        _table='short_video.rlog_douyin_haowu'
+        ;;
       music)
         _table='music'
         ;;
@@ -111,12 +114,14 @@ function build_stat_tables() {
           $DIR/stat_douyin_user_info.sh $_dt
           ;;
         comment)
-          echo "$DIR/build_base_douyin_comment.sh $_dt"
+          $DIR/build_base_douyin_comment.sh $_dt
           ;;
         goods)
-          echo "$DIR/build_base_douyin_goods_daily.sh $_dt"
-          echo "$DIR/build_base_douyin_haowu_daily.sh $_dt"
-          echo "$DIR/stat_douyin_video_info.sh $_dt"
+          $DIR/build_base_douyin_goods_daily.sh $_dt
+          $DIR/stat_douyin_take_goods.sh $_dt
+          ;;
+        haowu)
+          $DIR/build_base_douyin_haowu_daily.sh $_dt
           ;;
         music)
           _table='music'

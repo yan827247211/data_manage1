@@ -177,21 +177,27 @@ CREATE TABLE `base_douyin_haowu_daily`
     STORED AS ORC;
 
 --商品累计上榜天数
-CREATE TABLE `base_douyin_haowu_goods_onlist_count`
+CREATE TABLE `stat_douyin_haowu_goods_onlist_count`
 (
     `product_id` string COMMENT '商品ID',
     `onlist_cnt` int COMMENT '累计上榜天数（任意榜单）',
     `stat_time`  bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
 ) COMMENT '抖音-好物榜-累计上榜天数'
+    PARTITIONED BY (
+        `dt` string
+        )
     STORED AS ORC;
 
 --用户累计上榜天数
-CREATE TABLE `base_douyin_haowu_user_onlist_count`
+CREATE TABLE `stat_douyin_haowu_user_onlist_count`
 (
     `user_id`    string COMMENT '用户ID',
     `onlist_cnt` int COMMENT '累计上榜天数（任意榜单）',
     `stat_time`  bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
 ) COMMENT '抖音-好物榜-累计上榜天数'
+    PARTITIONED BY (
+        `dt` string
+        )
     STORED AS ORC;
 
 --抖音音乐原始日志 日志格式貌似不对，需要确认
@@ -555,6 +561,30 @@ CREATE TABLE `base_douyin_goods`
     `create_time`   bigint COMMENT '爬取时间,10位时间戳,爬虫提供',
     `stat_time`     bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
 ) COMMENT '抖音-商品-爬虫每日全量信息'
+    STORED AS ORC;
+
+--抖音商品每日全量表
+CREATE TABLE `stat_douyin_goods`
+(
+    `product_id`    string COMMENT '商品ID',
+    `promotion_id`  string COMMENT '商品推销id',
+    `user_id`       string COMMENT '用户ID',
+    `product_title` string COMMENT '商品标题',
+    `product_img`   string COMMENT '商品图片',
+    `market_price`  bigint COMMENT '商品原价',
+    `price`         bigint COMMENT '商品现价',
+    `sales`         bigint COMMENT '商品销量',
+    `visit_count`   bigint COMMENT '商品访问量（查看该商品人数）',
+    `detail_url`    string COMMENT '商品购买地址',
+    `rank`          int COMMENT '当前排名（针对好物榜）',
+    `score`         int COMMENT '当前人气值（针对好物榜）',
+    `cid`           string COMMENT '商品所属榜单id（针对好物榜）',
+    `create_time`   bigint COMMENT '爬取时间,10位时间戳,爬虫提供',
+    `stat_time`     bigint COMMENT '跑批批次，10位时间戳，跑批脚本提供'
+) COMMENT '抖音-商品-爬虫每日全量信息'
+    PARTITIONED BY (
+        `dt` string
+        )
     STORED AS ORC;
 
 --抖音达人带货统计表

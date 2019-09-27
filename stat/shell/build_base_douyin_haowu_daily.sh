@@ -88,7 +88,7 @@ if [ $# -ne 2 ]; then
   _ts=$(date +%s)
   log "dt=$_dt, ts=$_ts"
   hqlStr="
-  INSERT OVERWRITE TABLE short_video.base_douyin_haowu_goods_onlist_count
+  INSERT OVERWRITE TABLE short_video.stat_douyin_haowu_goods_onlist_count PARTITION(dt='$_dt')
     SELECT product_id, count(dt) as onListCnt,'$_ts'
     FROM (
      select product_id, dt
@@ -112,7 +112,7 @@ if [ $# -ne 2 ]; then
   _ts=$(date +%s)
   log "dt=$_dt, ts=$_ts"
   hqlStr="
-  INSERT OVERWRITE TABLE short_video.base_douyin_haowu_user_onlist_count
+  INSERT OVERWRITE TABLE short_video.stat_douyin_haowu_user_onlist_count PARTITION(dt='$_dt')
     SELECT user_id, count(dt) as onListCnt,'$_ts'
     FROM (
      select user_id, dt
@@ -137,8 +137,8 @@ _dt=$1
 #批次号，10位时间戳
 _ts=$(date +%s)
 
-#calc_base_douyin_haowu_daily ${_dt} ${_ts}
-#check "calc_base_douyin_haowu_daily ${_dt} ${_ts}"
+calc_base_douyin_haowu_daily ${_dt} ${_ts}
+check "calc_base_douyin_haowu_daily ${_dt} ${_ts}"
 stat_haowu_goods_onlist_count ${_dt} ${_ts}
 check "stat_haowu_goods_onlist_count ${_dt} ${_ts}"
 stat_haowu_user_onlist_count ${_dt} ${_ts}

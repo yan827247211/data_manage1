@@ -38,7 +38,8 @@ function execSql() {
   fi
 
   sqlStr=$1
-  ${MYSQL_BIN} -h"${MYSQL_W_HOST}" -P"${MYSQL_PORT}" -u"${MYSQL_W_USER}" -p"${MYSQL_W_PWD}" "${MYSQL_W_DBNAME}" -N -e "${sqlStr}"
+  echo "$sqlStr"
+  ${MYSQL_BIN} -h"${MYSQL_REPORT_HOST}" -P"${MYSQL_REPORT_PORT}" -u"${MYSQL_REPORT_USER}" -p"${MYSQL_REPORT_PWD}" "${MYSQL_REPORT_DB}" -N -e "${sqlStr}"
 }
 
 # 执行Hive语句
@@ -113,6 +114,40 @@ function exportHQL2MySQL() {
 
 }
 
+#导出hive命令的执行结果到MySQL
+function exportHQL2MySQLReplace() {
+  if [ $# -ne 4 ]; then
+    log "USAGE: exportHQL2Local hiveql localpath date_dt table"
+    exit;
+  fi
 
+  _hql=$1
+  _localpath=$2
+  _date_dt=$3
+  _table=$4
+  _job_dt=`date '+%Y-%m-%d'`
+  _job_time=`date '+%H_%M_%S'`
+  _ab_path="/home/hadoop/yulei/shell/data/$_localpath/$_job_dt/$_job_time/"
+  # for safty
+  _insert_local_hql="INSERT OVERWRITE DIRECTORY '$_ab_path'
+    ROW FORMAT DELIMITED
+    FIELDS TERMINATED BY '\t'
+    $_hql
+    "
+   execHql "$_insert_local_hql"
+   # 目录不存在则创建目录
+   if [ ! -d "$_ab_path" ]; then
+       mkdir -p "$_ab_path"
+   fi
+   ${HADOOP_BIN} fs -text $_ab_path* > ${_ab_path}result.txt
+
+   execSql "
+   LOAD DATA local INFILE '${_ab_path}result.txt' REPLACE INTO TABLE $_table
+   FIELDS TERMINATED BY '\t';
+   "
+
+   echo "$_ab_path"
+
+}
 
 

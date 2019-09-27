@@ -98,29 +98,7 @@ function calc_base_douyin_user_daily() {
   execHql "$hqlStr"
 }
 
-# 从评论数据中抽取计算用户-粉丝关系
-function build_user_fans_relation() {
-    if [ $# -ne 2 ]; then
-        log "wrong parameters:$@"
-        log 'usage:   build_user_fans_relation dt ts'
-        log 'example: build_user_fans_relation 20190920 1568165988'
-        exit 1
-    fi
 
-    _dt=$1
-    _ts=$2
-
-
-    hqlStr="
-        INSERT OVERWRITE TABLE short_video.relat_douyin_user_fans PARTITION(dt='$_dt')
-        select user_id, be_followered_uid,'$_ts'
-        from short_video.log_douyin_user
-        where dt<='$_dt'
-        and be_followered_uid is not null
-        group by user_id, be_followered_uid,'$_ts'
-    "
-    execHql "$hqlStr"
-}
 
 # 检查参数
 if [ $# -ne 1 ]; then
@@ -137,8 +115,6 @@ calc_base_douyin_user_daily ${_dt} ${_ts}
 check "calc_base_douyin_user_daily ${_dt} ${_ts}"
 calc_base_douyin_user_info ${_dt} ${_ts}
 check "calc_base_douyin_user_info ${_dt} ${_ts}"
-build_user_fans_relation  ${_dt} ${_ts}
-check "build_user_fans_relation ${_dt} ${_ts}"
 
 log "daily stat douyin user job done..."
 

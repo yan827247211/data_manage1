@@ -35,9 +35,6 @@ function calc_base_douyin_video_info() {
   _ts=$2
   log "dt=$_dt, ts=$_ts"
   hqlStr="
-  set mapred.child.java.opts=-Xmx2048m;
-  set mapreduce.map.memory.mb=2048;
-  set mapreduce.reduce.memory.mb=2048;
   set mapreduce.reduce.shuffle.input.buffer.percent=0.7;
   set mapreduce.reduce.shuffle.memory.limit.percent=0.1;
   set mapreduce.reduce.shuffle.merge.percent=0.5;
@@ -87,9 +84,6 @@ function calc_base_douyin_video_daily() {
   _ts=$(date +%s)
   log "dt=$_dt, ts=$_ts"
   hqlStr="
-  set mapred.child.java.opts=-Xmx2048m;
-  set mapreduce.map.memory.mb=2048;
-  set mapreduce.reduce.memory.mb=2048;
   set mapreduce.reduce.shuffle.input.buffer.percent=0.7;
   set mapreduce.reduce.shuffle.memory.limit.percent=0.1;
   set mapreduce.reduce.shuffle.merge.percent=0.5;

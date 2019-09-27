@@ -60,6 +60,25 @@ function calc_base_douyin_goods_info() {
   execHql "$hqlStr"
 }
 
+function stat_base_douyin_goods() {
+  if [ $# -ne 2 ]; then
+    log "wrong parameters:$@"
+    log 'usage:   stat_base_douyin_goods dt ts'
+    log 'example: stat_base_douyin_goods 20190911 1568165988'
+    exit 1
+  fi
+  _dt=$1
+  _ts=$2
+  log "dt=$_dt, ts=$_ts"
+  hqlStr="
+  INSERT OVERWRITE TABLE short_video.stat_douyin_goods PARTITION(dt='$_dt')
+  SELECT product_id, promotion_id, user_id, product_title, product_img, market_price
+         , price, sales, visit_count, detail_url, rank, score, cid, create_time, '$_ts'
+  FROM short_video.base_douyin_goods
+  "
+  execHql "$hqlStr"
+}
+
 # 增量计算抖音用户信息
 function calc_base_douyin_goods_daily() {
   if [ $# -ne 2 ]; then
@@ -103,6 +122,8 @@ calc_base_douyin_goods_daily ${_dt} ${_ts}
 check "calc_base_douyin_goods_daily ${_dt} ${_ts}"
 calc_base_douyin_goods_info ${_dt} ${_ts}
 check "calc_base_douyin_goods_info ${_dt} ${_ts}"
+stat_base_douyin_goods ${_dt} ${_ts}
+check "stat_base_douyin_goods ${_dt} ${_ts}"
 
 log "daily stat douyin goods job done..."
 

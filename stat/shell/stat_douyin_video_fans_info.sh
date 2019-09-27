@@ -231,6 +231,29 @@ function stat_douyin_user_fans_info() {
   execHql "$hqlStr"
 }
 
+# 从评论数据中抽取计算视频-粉丝关系
+function build_video_fans_relation_from_comment() {
+    if [ $# -ne 2 ]; then
+        log "wrong parameters:$@"
+        log 'usage:   build_video_fans_relation_from_comment dt ts'
+        log 'example: build_video_fans_relation_from_comment 20190920 1568165988'
+        exit 1
+    fi
+
+    _dt=$1
+    _ts=$2
+
+
+    hqlStr="
+        INSERT OVERWRITE TABLE short_video.relat_douyin_video_fans PARTITION(dt='$_dt')
+        SELECT aweme_id, user_id, "$_ts"
+        FROM short_video.log_douyin_comment
+        where dt<='$_dt'
+        GROUP BY aweme_id, user_id, "$_ts"
+    "
+    execHql "$hqlStr"
+}
+
 
 function export_video_fans_info() {
   if [ $# -ne 1 ]; then
@@ -254,7 +277,7 @@ function export_video_fans_info() {
         from short_video.stat_douyin_video_fans_info
         where dt='$_dt'
   "
-  exportHQL2MySQL "$hqlStr" "dy_rpt_video_proportion" "$_dt" "dy_rpt_video_proportion"
+  exportHQL2MySQLReplace "$hqlStr" "dy_rpt_video_proportion" "$_dt" "dy_rpt_video_proportion"
 }
 
 # 检查参数
@@ -268,10 +291,12 @@ _dt=$1
 #批次号，10位时间戳
 _ts=$(date +%s)
 
-#stat_douyin_video_fans_detail ${_dt} ${_ts}
-#check "stat_douyin_video_fans_detail  ${_dt} ${_ts}"
-#stat_douyin_user_fans_info  ${_dt} ${_ts}
-#check "stat_douyin_user_fans_info  ${_dt} ${_ts}"
+build_video_fans_relation_from_comment ${_dt} ${_ts}
+check "build_video_fans_relation_from_comment  ${_dt} ${_ts}"
+stat_douyin_video_fans_detail ${_dt} ${_ts}
+check "stat_douyin_video_fans_detail  ${_dt} ${_ts}"
+stat_douyin_user_fans_info  ${_dt} ${_ts}
+check "stat_douyin_user_fans_info  ${_dt} ${_ts}"
 export_video_fans_info  ${_dt}
 check "export_video_fans_info  ${_dt}"
 
