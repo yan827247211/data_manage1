@@ -64,7 +64,7 @@ function stat_dy_rpt_expert_sales_volume() {
                     from short_video.stat_douyin_take_goods
                     where dt='$_anchordt'
                     group by user_id
-                ) as a left join short_video.base_douyin_haowu_user_onlist_count b on (a.user_id=b.user_id)
+                ) as a left join short_video.stat_douyin_haowu_user_onlist_count b on (a.user_id=b.user_id and b.dt='$_anchordt')
             ) c
             where ranking<=1000
         ) x left join short_video.stat_douyin_user_info y on (x.user_id=y.user_id and y.dt='$_anchordt')
