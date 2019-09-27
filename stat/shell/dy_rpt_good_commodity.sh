@@ -37,8 +37,8 @@ function stat_dy_rpt_good_commodity_day() {
   _formated_anchordt=`date -d "$_anchordt" "+%Y-%m-%d"`
   log "_anchordt=$_anchordt, _comparedt=$_comparedt, ts=$_ts, _formated_anchordt=$_formated_anchordt"
   hqlStr="
-        select concat_ws('_', product_id,'$_anchordt','0' )
-        , stat.user_id
+        select concat_ws('_', product_id,'$_anchordt',cid,'0' )
+        , coalesce(stat.user_id,0) as user_id
         , ranking
         , score
         , product_id
@@ -46,10 +46,10 @@ function stat_dy_rpt_good_commodity_day() {
         , product_title
         , cid
         , brand_name
-        , us.unique_id
-        , us.head_img
-        , us.nickname
-        , us.follower_count
+        , coalesce(us.unique_id,'')
+        , coalesce(us.head_img,'')
+        , coalesce(us.nickname,'')
+        , coalesce(us.follower_count,0)
         , commodity_price
         , commodity_price_interval
         , sales
@@ -57,6 +57,9 @@ function stat_dy_rpt_good_commodity_day() {
         , continuous_list
         , '0'
         , '$_anchordt'
+        , from_unixtime($_ts) as create_time
+        , from_unixtime($_ts) as update_time
+        , 0 as status
         from (
         select
         user_id
@@ -83,7 +86,9 @@ function stat_dy_rpt_good_commodity_day() {
         from short_video.base_douyin_haowu_daily a left join short_video.stat_douyin_haowu_goods_onlist_count b on (a.product_id=b.product_id and a.dt='$_anchordt' and b.dt='$_anchordt')
         where a.dt='$_anchordt' and b.dt='$_anchordt') stat left join short_video.stat_douyin_user_info us on (stat.user_id=us.user_id and us.dt='$_anchordt')
   "
-  exportHQL2Local "$hqlStr" "stat_dy_rpt_good_commodity_day"
+
+  exportHQL2MySQL "$hqlStr" "stat_dy_rpt_good_commodity_day" "$_anchordt" 'video_report.dy_rpt_good_commodity'
+
 #    echo "$hqlStr"
 }
 

@@ -51,25 +51,26 @@ function stat_dy_rpt_expert_sales_volume() {
         , onlist_cnt as continuous_list
         , 0 as date_type
         ,'$_anchordt' as dt
-        , null as create_time
-        , null as update_time
-        , null as status
+        , from_unixtime($_ts) as create_time
+        , from_unixtime($_ts) as update_time
+        , 0 as status
         from (
             select user_id, at_sale_goods,sales,sales_amount,onlist_cnt,ranking from (
                 select a.user_id, a.at_sale_goods, a.sales, a.sales_amount
                 , case when b.onlist_cnt is null then 0 else b.onlist_cnt end as onlist_cnt,
                 row_number() over (order by case when b.onlist_cnt is null then 0 else b.onlist_cnt end desc, a.sales desc) as ranking
                 from (
-                    select user_id, count(distinct product_id) at_sale_goods, sum(user_sales) sales, cast(sum(user_sales*price/100) as decimal(10,2)) as sales_amount
+                    select user_id, count(distinct product_id) at_sale_goods, sum(user_sales) sales, cast(sum(user_sales*price/100) as decimal(20,2)) as sales_amount
                     from short_video.stat_douyin_take_goods
-                    where dt='$_anchordt'
+                    where dt='$_anchordt' and user_sales>0 and user_sales is not null
                     group by user_id
                 ) as a left join short_video.stat_douyin_haowu_user_onlist_count b on (a.user_id=b.user_id and b.dt='$_anchordt')
             ) c
             where ranking<=1000
         ) x left join short_video.stat_douyin_user_info y on (x.user_id=y.user_id and y.dt='$_anchordt')
   "
-  exportHQL2Local "$hqlStr" "dy_rpt_expert_sales_volume"
+  exportHQL2MySQL "$hqlStr" "dy_rpt_expert_sales_volume" "$_anchordt" 'video_report.dy_rpt_expert_sales_volume'
+
 #    echo "$hqlStr"
 }
 
