@@ -58,9 +58,9 @@ select * from (
   , a.age as expert_age
   , a.province
   , coalesce(a.city,'未知城市') as city
-  , '' as fans_mainly_age
-  , '' as fans_maily_province
-  , '' as fans_mainly_city
+  , d.main_age as fans_mainly_age
+  , d.main_province as fans_maily_province
+  , d.main_city as fans_mainly_city
   , case when a.average_digg<100000 then 1
      when a.average_digg>=100000 and a.average_digg<500000 then 2
      when a.average_digg>=500000 and a.average_digg<1000000 then 3
@@ -99,7 +99,17 @@ select * from (
      when a.today_follower_count>=10000000 and a.today_follower_count<20000000 then 3
      when a.today_follower_count>=20000000 then 4
     end as fans_number_interregional
-  , 'a.female_rate_seg' as female_fan_ratio
+  , case when d.female_rate is null or d.female_rate<10 then 0
+  	when d.female_rate>=10 and d.female_rate<20 then 1
+  	when d.female_rate>=20 and d.female_rate<30 then 2
+  	when d.female_rate>=30 and d.female_rate<40 then 3
+  	when d.female_rate>=40 and d.female_rate<50 then 4
+  	when d.female_rate>=50 and d.female_rate<60 then 5
+  	when d.female_rate>=60 and d.female_rate<70 then 6
+  	when d.female_rate>=70 and d.female_rate<80 then 7
+  	when d.female_rate>=80 and d.female_rate<90 then 8
+  	when d.female_rate>=90 then 9
+    end as female_fan_ratio
   , '0' as data_type
   , '$_anchordt'
   from (
@@ -134,7 +144,8 @@ select * from (
     ) today left join short_video.stat_douyin_user_info lastday on (today.user_id=lastday.user_id and lastday.dt='$_comparedt')
   ) a left join short_video.dim_user_label b on (a.user_id=b.user_id)
   left join short_video.dim_user_industry c on (a.user_id=c.user_id)
-) rpt where ranking<=1000
+  left join short_video.stat_douyin_user_fans_info d on (a.user_id=d.user_id and d.dt='$_anchordt')
+) rpt where ranking<=500
   "
   exportHQL2MySQL "$hqlStr" "dy_rpt_expert_growing" "$_anchordt" 'video_report.dy_rpt_expert_growing'
 #    echo "$hqlStr"
