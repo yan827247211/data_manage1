@@ -93,6 +93,18 @@ select * from (
      when a.today_total_favorited>=1000000 and a.today_total_favorited<2000000 then 4
      when a.today_total_favorited>=2000000 then 5
     end as like_number_interregional
+  , case when a.today_video_comment_count>=5 and a.today_video_comment_count<10 then 0
+     when a.today_video_comment_count>=10 and a.today_video_comment_count<50 then 1
+     when a.today_video_comment_count>=50 and a.today_video_comment_count<100 then 2
+     when a.today_video_comment_count>=100 and a.today_video_comment_count<200 then 3
+     when a.today_video_comment_count>=200 then 4
+    end as comment_number_interregional
+  , case when a.today_video_share_count>=1 and a.today_video_share_count<5 then 0
+     when a.today_video_share_count>=5 and a.today_video_share_count<10 then 1
+     when a.today_video_share_count>=10 and a.today_video_share_count<50 then 2
+     when a.today_video_share_count>=50 and a.today_video_share_count<100 then 3
+     when a.today_video_share_count>=100 then 4
+    end as forward_number_interregional
   , case when a.today_follower_count<1000000 then 0
      when a.today_follower_count>=1000000 and a.today_follower_count<5000000 then 1
      when a.today_follower_count>=5000000 and a.today_follower_count<10000000 then 2
@@ -112,6 +124,9 @@ select * from (
     end as female_fan_ratio
   , '0' as data_type
   , '$_anchordt'
+  , from_unixtime($_ts) as create_time
+  , from_unixtime($_ts) as update_time
+  , 0 as status
   from (
     select today.user_id, today.sec_user_id, today.unique_id, today.nickname, today.head_img, today.gender, today.age  , today.province, today.city
     , today.account_authentication

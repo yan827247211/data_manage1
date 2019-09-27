@@ -105,7 +105,7 @@ function exportHQL2MySQL() {
    fi
    ${HADOOP_BIN} fs -text $_ab_path* > ${_ab_path}result.txt
 
-   echo "delete from $_table where date='$_date_dt';
+   execSql "delete from $_table where date='$_date_dt';
    LOAD DATA local INFILE '${_ab_path}result.txt' INTO TABLE $_table
    FIELDS TERMINATED BY '\t';
 "

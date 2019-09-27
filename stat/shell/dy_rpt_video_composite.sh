@@ -78,6 +78,9 @@ function stat_dy_rpt_video_composite() {
         , 0 as date_type
         , commodity_id as commodity_id
         ,'$_anchordt' as dt
+        , from_unixtime($_ts) as create_time
+        , from_unixtime($_ts) as update_time
+        , 0 as status
         from (
             select s.user_id
             , s.aweme_id as video_id
@@ -124,12 +127,12 @@ function stat_dy_rpt_video_composite() {
                   , share_url, duration, cover_img, desc, product_id
                   from short_video.stat_douyin_video_info
                   where dt='$_anchordt') a
-                where a.rank<=3000) today left join short_video.stat_douyin_video_info lastday on (today.aweme_id=lastday.aweme_id and lastday.dt='$_comparedt')
+                where a.rank<=1000) today left join short_video.stat_douyin_video_info lastday on (today.aweme_id=lastday.aweme_id and lastday.dt='$_comparedt')
                 left join short_video.stat_douyin_video_fans_info fans_stat on (today.aweme_id=fans_stat.aweme_id and fans_stat.dt='$_anchordt')
             ) s left join short_video.stat_douyin_user_info u on (s.user_id=u.user_id and u.dt='$_anchordt')
         ) rpt
   "
-  exportHQL2Local "$hqlStr" "dy_rpt_video_composite"
+  exportHQL2MySQL "$hqlStr" "dy_rpt_video_composite" "$_anchordt" 'video_report.dy_rpt_video_composite'
 #    echo "$hqlStr"
 }
 

@@ -77,6 +77,9 @@ function stat_dy_rpt_video_soaring() {
         , 0 as date_type
         , commodity_id as commodity_id
         ,'$_anchordt' as dt
+        , from_unixtime($_ts) as create_time
+        , from_unixtime($_ts) as update_time
+        , 0 as status
         from (
              select today.aweme_id as video_id, today.user_id as user_id, today.share_url, today.duration as video_duration, today.cover_img as video_cover, today.desc as video_title, today.product_id as commodity_id
              , today.digg_count like_number, coalesce(lastday.digg_count, today.digg_count) lastday_like_number
@@ -87,7 +90,7 @@ function stat_dy_rpt_video_soaring() {
             from short_video.stat_douyin_video_info today left join short_video.stat_douyin_video_info lastday on (today.aweme_id=lastday.aweme_id and lastday.dt='$_comparedt' and today.dt='$_anchordt')
         ) s left join short_video.stat_douyin_user_info u on (s.user_id=u.user_id and u.dt='$_anchordt' and s.ranking<=3000)
         left join short_video.stat_douyin_video_fans_info fans_stat on (s.video_id=fans_stat.aweme_id and fans_stat.dt='$_anchordt' and s.ranking<=3000)
-        where ranking<=3000
+        where ranking<=1000
   "
   exportHQL2MySQL "$hqlStr" "stat_dy_rpt_video_soaring" "$_anchordt" "video_report.dy_rpt_video_soaring"
 #    echo "$hqlStr"
