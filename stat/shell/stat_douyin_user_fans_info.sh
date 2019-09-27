@@ -200,6 +200,31 @@ function stat_douyin_user_fans_info() {
   execHql "$hqlStr"
 }
 
+function export_user_fans_info() {
+  if [ $# -ne 1 ]; then
+    log "wrong parameters:$@"
+    log 'usage:   export_user_fans_info dt'
+    log 'example: export_user_fans_info 20190911'
+    exit 1
+  fi
+  _dt=$1
+  _ts=$2
+  log "dt=$_dt, ts=$_ts"
+
+  hqlStr="
+    select concat_ws('_',a.user_id,a.dt)
+        , a.user_id
+        , b.unique_id
+        , a.fans_province
+        , a.fans_city
+        , a.fans_age
+        , a.female_rate
+        from short_video.stat_douyin_user_fans_info a left join short_video.stat_douyin_user_info b on (a.user_id=b.user_id and a.dt='$_dt' and b.dt='$_dt')
+        where a.dt='$_dt' and b.dt='$_dt'
+  "
+  exportHQL2MySQL "$hqlStr" "dy_rpt_expert_proportion" "$_dt" "dy_rpt_expert_proportion"
+}
+
 # 检查参数
 if [ $# -ne 1 ]; then
   log 'wrong parameters!'
@@ -211,9 +236,10 @@ _dt=$1
 #批次号，10位时间戳
 _ts=$(date +%s)
 
-stat_douyin_user_fans_details ${_dt} ${_ts}
-check "stat_douyin_user_fans_details  ${_dt} ${_ts}"
-stat_douyin_user_fans_info  ${_dt} ${_ts}
-check "stat_douyin_user_fans_info  ${_dt} ${_ts}"
-
+#stat_douyin_user_fans_details ${_dt} ${_ts}
+#check "stat_douyin_user_fans_details  ${_dt} ${_ts}"
+#stat_douyin_user_fans_info  ${_dt} ${_ts}
+#check "stat_douyin_user_fans_info  ${_dt} ${_ts}"
+export_user_fans_info ${_dt}
+check "export_user_fans_info  ${_dt}"
 log "daily stat douyin user stat job done..."

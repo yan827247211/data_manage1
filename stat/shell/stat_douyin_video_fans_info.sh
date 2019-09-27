@@ -231,6 +231,32 @@ function stat_douyin_user_fans_info() {
   execHql "$hqlStr"
 }
 
+
+function export_video_fans_info() {
+  if [ $# -ne 1 ]; then
+    log "wrong parameters:$@"
+    log 'usage:   export_video_fans_info dt'
+    log 'example: export_video_fans_info 20190911'
+    exit 1
+  fi
+  _dt=$1
+  _ts=$2
+  log "dt=$_dt, ts=$_ts"
+
+  hqlStr="
+    select concat_ws('_',aweme_id,dt)
+        , aweme_id
+        , hotwords
+        , fans_province
+        , fans_city
+        , fans_age
+        , female_rate
+        from short_video.stat_douyin_video_fans_info
+        where dt='$_dt'
+  "
+  exportHQL2MySQL "$hqlStr" "dy_rpt_video_proportion" "$_dt" "dy_rpt_video_proportion"
+}
+
 # 检查参数
 if [ $# -ne 1 ]; then
   log 'wrong parameters!'
@@ -242,9 +268,11 @@ _dt=$1
 #批次号，10位时间戳
 _ts=$(date +%s)
 
-stat_douyin_video_fans_detail ${_dt} ${_ts}
-check "stat_douyin_video_fans_detail  ${_dt} ${_ts}"
-stat_douyin_user_fans_info  ${_dt} ${_ts}
-check "stat_douyin_user_fans_info  ${_dt} ${_ts}"
+#stat_douyin_video_fans_detail ${_dt} ${_ts}
+#check "stat_douyin_video_fans_detail  ${_dt} ${_ts}"
+#stat_douyin_user_fans_info  ${_dt} ${_ts}
+#check "stat_douyin_user_fans_info  ${_dt} ${_ts}"
+export_video_fans_info  ${_dt}
+check "export_video_fans_info  ${_dt}"
 
 log "daily stat douyin user stat job done..."
