@@ -256,10 +256,10 @@ function build_video_fans_relation_from_comment() {
 
 
 function export_video_fans_info() {
-  if [ $# -ne 1 ]; then
+  if [ $# -ne 2 ]; then
     log "wrong parameters:$@"
-    log 'usage:   export_video_fans_info dt'
-    log 'example: export_video_fans_info 20190911'
+    log 'usage:   export_video_fans_info dt ts'
+    log 'example: export_video_fans_info 20190911 1568165988'
     exit 1
   fi
   _dt=$1
@@ -274,6 +274,9 @@ function export_video_fans_info() {
         , fans_city
         , fans_age
         , female_rate
+        , 0 as status
+        , from_unixtime($_ts) as create_time
+        , from_unixtime($_ts) as update_time
         from short_video.stat_douyin_video_fans_info
         where dt='$_dt'
   "
@@ -297,7 +300,7 @@ stat_douyin_video_fans_detail ${_dt} ${_ts}
 check "stat_douyin_video_fans_detail  ${_dt} ${_ts}"
 stat_douyin_user_fans_info  ${_dt} ${_ts}
 check "stat_douyin_user_fans_info  ${_dt} ${_ts}"
-export_video_fans_info  ${_dt}
-check "export_video_fans_info  ${_dt}"
+export_video_fans_info  ${_dt} ${_ts}
+check "export_video_fans_info  ${_dt} ${_ts}"
 
 log "daily stat douyin user stat job done..."

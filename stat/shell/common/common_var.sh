@@ -12,7 +12,10 @@ HDFS_BIN='/usr/local/service/hadoop/bin/hdfs'
 
 # MySQL相关数据
 MYSQL_BIN='/bin/mysql'
-MYSQL_REPORT_HOST=10.0.0.14
+# test
+#MYSQL_REPORT_HOST=10.0.0.14
+# product
+MYSQL_REPORT_HOST=10.0.0.28
 MYSQL_REPORT_PORT=3306
 MYSQL_REPORT_USER=video_user
 MYSQL_REPORT_PWD=7zhwaG6nUTJscCpH

@@ -138,7 +138,7 @@ function stat_douyin_user_fans_info() {
       , main_city.main_city
       ,'$_ts'
       from (select user_id
-       from stat_douyin_user_fans_detail
+       from short_video.stat_douyin_user_fans_detail
        where dt='$_dt' group by user_id) u
         left join (
           -- 省份
@@ -225,10 +225,10 @@ function build_user_fans_relation() {
 }
 
 function export_user_fans_info() {
-  if [ $# -ne 1 ]; then
+  if [ $# -ne 2 ]; then
     log "wrong parameters:$@"
-    log 'usage:   export_user_fans_info dt'
-    log 'example: export_user_fans_info 20190911'
+    log 'usage:   export_user_fans_info dt ts'
+    log 'example: export_user_fans_info 20190911 1568165988'
     exit 1
   fi
   _dt=$1
@@ -243,6 +243,9 @@ function export_user_fans_info() {
         , a.fans_city
         , a.fans_age
         , a.female_rate
+        , 0 as status
+        , from_unixtime($_ts) as create_time
+        , from_unixtime($_ts) as update_time
         from short_video.stat_douyin_user_fans_info a left join short_video.stat_douyin_user_info b on (a.user_id=b.user_id and a.dt='$_dt' and b.dt='$_dt')
         where a.dt='$_dt' and b.dt='$_dt'
   "
@@ -267,6 +270,6 @@ stat_douyin_user_fans_details ${_dt} ${_ts}
 check "stat_douyin_user_fans_details  ${_dt} ${_ts}"
 stat_douyin_user_fans_info  ${_dt} ${_ts}
 check "stat_douyin_user_fans_info  ${_dt} ${_ts}"
-export_user_fans_info ${_dt}
-check "export_user_fans_info  ${_dt}"
+export_user_fans_info ${_dt} ${_ts}
+check "export_user_fans_info  ${_dt}  ${_ts}"
 log "daily stat douyin user stat job done..."
