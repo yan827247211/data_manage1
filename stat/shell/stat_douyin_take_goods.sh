@@ -46,6 +46,7 @@ function stat_douyin_take_goods() {
             select user_id, product_id, sum(digg_count) as digg
             FROM short_video.stat_douyin_video_info
             WHERE dt='$_dt'
+            and digg_count>0
             and product_id is not null
             GROUP BY user_id, product_id
           ) stat_percent
