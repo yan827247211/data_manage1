@@ -215,11 +215,11 @@ function build_user_fans_relation() {
 
     hqlStr="
         INSERT OVERWRITE TABLE short_video.relat_douyin_user_fans PARTITION(dt='$_dt')
-        select user_id, be_followered_uid,'$_ts'
+        select be_followered_uid, user_id, '$_ts'
         from short_video.log_douyin_user
         where dt<='$_dt'
         and be_followered_uid is not null
-        group by user_id, be_followered_uid,'$_ts'
+        group by be_followered_uid, user_id, '$_ts'
     "
     execHql "$hqlStr"
 }
