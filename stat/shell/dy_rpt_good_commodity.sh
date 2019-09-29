@@ -63,7 +63,7 @@ function stat_dy_rpt_good_commodity_day() {
         from (
         select
         user_id
-        , row_number() over (order by score desc) as ranking
+        , rank as ranking
         , score
         , a.product_id, product_img, product_title, cid, '' as brand_name
         , cast(price/100 as decimal(10,2)) as commodity_price
