@@ -37,7 +37,7 @@ function stat_douyin_user_fans_details() {
   hqlStr="
   --性别
 INSERT OVERWRITE TABLE short_video.stat_douyin_user_fans_detail PARTITION(dt='$_dt', prop_type='gender')
-select user_id, gender, ranking, cnt as gender_cnt, concat(round(100*cnt/sum(cnt) over (partition by user_id),2),'%') as perct,'$_ts'
+select user_id, gender, ranking, cnt as gender_cnt, concat(round(100*cnt/sum(cnt) over (partition by user_id),1),'%') as perct,'$_ts'
 from (
   select user_id, gender, cnt, row_number() over (partition by user_id order by cnt desc) as ranking
   from (
@@ -49,11 +49,8 @@ from (
 ) c;
 -- 城市
 INSERT OVERWRITE TABLE short_video.stat_douyin_user_fans_detail PARTITION(dt='$_dt', prop_type='city')
-select user_id, city, rank, cnt, concat(round(100*cnt/sum(cnt) over (partition by user_id),2),'%') as perct,'$_ts'
+select user_id, city, rank, cnt, concat(round(100*cnt/sum(cnt) over (partition by user_id),1),'%') as perct,'$_ts'
 from (
-  select user_id, case when rank<=19 then city else '其他城市' end as city
-  , case when rank<=19 then rank else 20 end as rank
-  , sum(cnt) as cnt from (
     select user_id, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY cnt DESC) AS rank, city, cnt
     from(
         SELECT a.user_id, b.city, count(1) as cnt
@@ -61,17 +58,11 @@ from (
         where b.city is not null
         GROUP BY a.user_id, b.city
     ) c
-  ) d
-  group by user_id, case when rank<=19 then city else '其他城市' end
-  , case when rank<=19 then rank else 20 end
-) e;
+) e where rank<=10;
 --省份
 INSERT OVERWRITE TABLE short_video.stat_douyin_user_fans_detail PARTITION(dt='$_dt', prop_type='province')
-select user_id, province, rank, cnt, concat(round(100*cnt/sum(cnt) over (partition by user_id),2),'%') as perct,'$_ts'
+select user_id, province, rank, cnt, concat(round(100*cnt/sum(cnt) over (partition by user_id),1),'%') as perct,'$_ts'
 from (
-  select user_id, case when rank<=19 then province else '其他省份' end as province
-  , case when rank<=19 then rank else 20 end as rank
-  , sum(cnt) as cnt from (
     select user_id, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY cnt DESC) AS rank, province, cnt
     from(
         SELECT a.user_id, b.province, count(1) as cnt
@@ -79,14 +70,11 @@ from (
         where b.province is not null
         GROUP BY a.user_id, b.province
     ) c
-  ) d
-  group by user_id, case when rank<=19 then province else '其他省份' end
-  , case when rank<=19 then rank else 20 end
-) e;
+) e where rank<=10;
 
 --年龄
 INSERT OVERWRITE TABLE short_video.stat_douyin_user_fans_detail PARTITION(dt='$_dt', prop_type='age')
-select user_id, age_seg, rank, cnt, concat(round(100*cnt/sum(cnt) over (partition by user_id),2),'%') as perct,'$_ts'
+select user_id, age_seg, rank, cnt, concat(round(100*cnt/sum(cnt) over (partition by user_id),1),'%') as perct,'$_ts'
 from (
     select user_id, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY cnt DESC) AS rank, age_seg, cnt
     from(

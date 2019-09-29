@@ -37,7 +37,7 @@ function stat_douyin_video_fans_detail() {
   hqlStr="
 -- 性别
 INSERT OVERWRITE TABLE short_video.stat_douyin_video_fans_detail PARTITION(dt='$_dt', prop_type='gender')
-select aweme_id, gender, ranking, cnt as gender_cnt, concat(round(100*cnt/sum(cnt) over (partition by aweme_id),2),'%') as perct,'$_ts'
+select aweme_id, gender, ranking, cnt as gender_cnt, concat(round(100*cnt/sum(cnt) over (partition by aweme_id),1),'%') as perct,'$_ts'
 from (
   select aweme_id, gender, cnt, row_number() over (partition by aweme_id order by cnt desc) as ranking
   from (
@@ -50,11 +50,8 @@ from (
 
 --城市
 INSERT OVERWRITE TABLE short_video.stat_douyin_video_fans_detail PARTITION(dt='$_dt', prop_type='city')
-select aweme_id, city, rank, cnt, concat(round(100*cnt/sum(cnt) over (partition by aweme_id),2),'%') as perct,'$_ts'
+select aweme_id, city, rank, cnt, concat(round(100*cnt/sum(cnt) over (partition by aweme_id),1),'%') as perct,'$_ts'
 from (
-  select aweme_id, case when rank<=19 then city else '其他城市' end as city
-  , case when rank<=19 then rank else 20 end as rank
-  , sum(cnt) as cnt from (
     select aweme_id, ROW_NUMBER() OVER (PARTITION BY aweme_id ORDER BY cnt DESC) AS rank, city, cnt
     from(
         SELECT a.aweme_id, b.city, count(1) as cnt
@@ -62,18 +59,12 @@ from (
         where b.city is not null
         GROUP BY a.aweme_id, b.city
     ) c
-  ) d
-  group by aweme_id, case when rank<=19 then city else '其他城市' end
-  , case when rank<=19 then rank else 20 end
-) e;
+) e where rank<=10;
 
 --省份
 INSERT OVERWRITE TABLE short_video.stat_douyin_video_fans_detail PARTITION(dt='$_dt', prop_type='province')
-select aweme_id, province, rank, cnt, concat(round(100*cnt/sum(cnt) over (partition by aweme_id),2),'%') as perct,'$_ts'
+select aweme_id, province, rank, cnt, concat(round(100*cnt/sum(cnt) over (partition by aweme_id),1),'%') as perct,'$_ts'
 from (
-  select aweme_id, case when rank<=19 then province else '其他省份' end as province
-  , case when rank<=19 then rank else 20 end as rank
-  , sum(cnt) as cnt from (
     select aweme_id, ROW_NUMBER() OVER (PARTITION BY aweme_id ORDER BY cnt DESC) AS rank, province, cnt
     from(
         SELECT a.aweme_id, b.province, count(1) as cnt
@@ -81,14 +72,11 @@ from (
         where b.province is not null
         GROUP BY a.aweme_id, b.province
     ) c
-  ) d
-  group by aweme_id, case when rank<=19 then province else '其他省份' end
-  , case when rank<=19 then rank else 20 end
-) e;
+) e where rank<=10;
 
 --年龄
 INSERT OVERWRITE TABLE short_video.stat_douyin_video_fans_detail PARTITION(dt='$_dt', prop_type='age')
-select aweme_id, age_seg, rank, cnt, concat(round(100*cnt/sum(cnt) over (partition by aweme_id),2),'%') as perct,'$_ts'
+select aweme_id, age_seg, rank, cnt, concat(round(100*cnt/sum(cnt) over (partition by aweme_id),1),'%') as perct,'$_ts'
 from (
     select aweme_id, ROW_NUMBER() OVER (PARTITION BY aweme_id ORDER BY cnt DESC) AS rank, age_seg, cnt
     from(
@@ -118,11 +106,8 @@ ADD JAR /home/hadoop/yulei/jar/hive-udf-1.0.jar;
 CREATE TEMPORARY FUNCTION seg AS 'com.mobduos.bigdata.hive.udf.HanlpSegUDF';
 
 INSERT OVERWRITE TABLE short_video.stat_douyin_video_fans_detail PARTITION(dt='$_dt', prop_type='hotword')
-select aweme_id, token, rank, cnt, concat(round(100*cnt/sum(cnt) over (partition by aweme_id),2),'%') as perct,'$_ts'
+select aweme_id, token, rank, cnt, concat(round(100*cnt/sum(cnt) over (partition by aweme_id),1),'%') as perct,'$_ts'
 from (
-  select aweme_id, case when rank<=19 then token else '其他热词' end as token
-  , case when rank<=19 then rank else 20 end as rank
-  , sum(cnt) as cnt from (
     select aweme_id, ROW_NUMBER() OVER (PARTITION BY aweme_id ORDER BY cnt DESC) AS rank, token, cnt
     from(
         select aweme_id, token, count(1) cnt from (
@@ -133,10 +118,7 @@ from (
         )b
         group by aweme_id,token
     ) c
-  ) d
-  group by aweme_id, case when rank<=19 then token else '其他热词' end
-  , case when rank<=19 then rank else 20 end
-) e;
+) e where rank<=10;
   "
   execHql "$hqlStr"
 }
