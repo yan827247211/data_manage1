@@ -249,7 +249,7 @@ function export_video_fans_info() {
   log "dt=$_dt, ts=$_ts"
 
   hqlStr="
-    select concat_ws('_',aweme_id,dt)
+    select aweme_id
         , aweme_id
         , hotwords
         , fans_province

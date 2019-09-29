@@ -88,6 +88,7 @@ function stat_dy_rpt_video_soaring() {
              , (today.digg_count-coalesce(lastday.digg_count, today.digg_count))+(today.comment_count-coalesce(lastday.comment_count, today.comment_count))*2+(today.share_count-coalesce(lastday.share_count, today.share_count))*3 as score
              , row_number() over (order by (today.digg_count-coalesce(lastday.digg_count, today.digg_count))+(today.comment_count-coalesce(lastday.comment_count, today.comment_count))*2+(today.share_count-coalesce(lastday.share_count, today.share_count))*3 desc) as ranking
             from short_video.stat_douyin_video_info today left join short_video.stat_douyin_video_info lastday on (today.aweme_id=lastday.aweme_id and lastday.dt='$_comparedt' and today.dt='$_anchordt')
+            where today.dt='$_anchordt'
         ) s left join short_video.stat_douyin_user_info u on (s.user_id=u.user_id and u.dt='$_anchordt' and s.ranking<=1000)
         left join short_video.stat_douyin_video_fans_info fans_stat on (s.video_id=fans_stat.aweme_id and fans_stat.dt='$_anchordt' and s.ranking<=1000)
         where ranking<=1000

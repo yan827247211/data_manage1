@@ -224,7 +224,7 @@ function export_user_fans_info() {
   log "dt=$_dt, ts=$_ts"
 
   hqlStr="
-    select concat_ws('_',a.user_id,a.dt)
+    select a.user_id
         , a.user_id
         , b.unique_id
         , a.fans_province
