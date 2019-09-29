@@ -58,7 +58,7 @@ function stat_dy_rpt_expert_sales_volume() {
             select user_id, at_sale_goods,sales,sales_amount,onlist_cnt,ranking from (
                 select a.user_id, a.at_sale_goods, a.sales, a.sales_amount
                 , case when b.onlist_cnt is null then 0 else b.onlist_cnt end as onlist_cnt,
-                row_number() over (order by case when b.onlist_cnt is null then 0 else b.onlist_cnt end desc, a.sales desc) as ranking
+                row_number() over (order by a.sales desc) as ranking
                 from (
                     select user_id, count(distinct product_id) at_sale_goods, sum(user_sales) sales, cast(sum(user_sales*price/100) as decimal(20,2)) as sales_amount
                     from short_video.stat_douyin_take_goods
