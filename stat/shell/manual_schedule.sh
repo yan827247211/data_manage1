@@ -29,6 +29,10 @@ if [ $# -eq 1 ]; then
 fi
 log "job_dt=$_job_dt"
 
+log '=============start to sync dim============='
+/home/hadoop/yulei/shell/sync_mysql_tags.sh
+log '=============sync dim done============='
+
 log '=============start to sync and clean logs============='
 /home/hadoop/yulei/shell/build_daily_log.sh $_job_dt user video comment goods haowu
 log '=============sync and clean logs done============='

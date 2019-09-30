@@ -145,9 +145,9 @@ function calc_dim_user_label() {
     execHql "$dim_user_industry_hql"
 }
 
-#sync_mysql_label
-#sync_mysql_user_label
-#sync_mysql_industry
-#sync_mysql_user_industry
+sync_mysql_label
+sync_mysql_user_label
+sync_mysql_industry
+sync_mysql_user_industry
 calc_dim_user_industry
 calc_dim_user_label
