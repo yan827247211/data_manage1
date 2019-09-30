@@ -117,6 +117,7 @@ if [ $# -ne 2 ]; then
     FROM (
      select user_id, dt
      from short_video.base_douyin_haowu_daily
+     where user_id is not null
      group by user_id,dt
     ) a
     group by user_id
