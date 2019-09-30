@@ -22,7 +22,7 @@ source "$DIR/common/common_var.sh"
 source "$DIR/common/common_func.sh"
 
 _dt=`date +%Y%m%d`
-_job_dt=`date -d "1 day ago" "+%Y%m%d"`
+_job_dt=`date +%Y%m%d`
 
 if [ $# -eq 1 ]; then
   _job_dt=$1

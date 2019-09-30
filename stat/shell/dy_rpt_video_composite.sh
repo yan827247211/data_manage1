@@ -34,8 +34,9 @@ function stat_dy_rpt_video_composite() {
   _anchordt=$1
   _comparedt=$2
   _data_type=$3
+  _anchordt_oneday_ago=`date -d "$_anchordt 1 day ago" "+%Y%m%d"`
   _formated_anchordt=`date -d "$_anchordt" "+%Y-%m-%d"`
-  log "_anchordt=$_anchordt, _comparedt=$_comparedt, ts=$_ts, _formated_anchordt=$_formated_anchordt"
+  log "_anchordt=$_anchordt, _comparedt=$_comparedt, ts=$_ts, _formated_anchordt=$_formated_anchordt, _anchordt_oneday_ago=$_anchordt_oneday_ago"
   hqlStr="
         select concat_ws('_', video_id,'$_anchordt', '0') as id
         ,user_id, video_id, share_url, ranking, score, fans_number
@@ -126,7 +127,7 @@ function stat_dy_rpt_video_composite() {
                   , row_number() over (order by digg_count+comment_count*2+share_count*3 desc) as rank
                   , share_url, duration, cover_img, desc, product_id
                   from short_video.stat_douyin_video_info
-                  where dt='$_anchordt') a
+                  where dt='$_anchordt' and from_unixtime(video_create_time,'yyyyMMdd')='$_anchordt_oneday_ago') a
                 where a.rank<=1000) today left join short_video.stat_douyin_video_info lastday on (today.aweme_id=lastday.aweme_id and lastday.dt='$_comparedt')
                 left join short_video.stat_douyin_video_fans_info fans_stat on (today.aweme_id=fans_stat.aweme_id and fans_stat.dt='$_anchordt')
             ) s left join short_video.stat_douyin_user_info u on (s.user_id=u.user_id and u.dt='$_anchordt')
